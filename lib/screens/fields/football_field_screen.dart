@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FootballFieldScreen extends StatelessWidget {
   const FootballFieldScreen({super.key});
@@ -31,18 +32,31 @@ class FootballFieldScreen extends StatelessWidget {
         itemCount: fields.length,
         itemBuilder: (context, index) {
           final field = fields[index];
+          final coords = field['gps']!.split(',');
+          final lat = coords[0].trim();
+          final lng = coords[1].trim();
+
           return ListTile(
             leading: const Icon(Icons.location_on),
             title: Text(field['name']!),
             subtitle: Text("${field['address']} • GPS: ${field['gps']}"),
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Opening map for ${field['name']}...")),
-              );
+              _openMap(lat, lng);
             },
           );
         },
       ),
     );
+  }
+}
+
+Future<void> _openMap(String lat, String lng) async {
+  final uri = Uri.parse(
+    'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=walking',
+  );
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  } else {
+    throw 'Could not launch $uri';
   }
 }
