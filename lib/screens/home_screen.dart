@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/activity_card.dart';
+import '../screens/fields/football_field_screen.dart';
+
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -45,6 +48,19 @@ class HomeScreen extends StatelessWidget {
               backgroundColor: Colors.teal,
               onPressed: () {},
             ),
+            ActivityCard(
+              title: "Free Football Field",
+              subtitle: "Open today",
+              buttonText: "JOIN",
+              icon: Icons.sports_soccer,
+              backgroundColor: Colors.green,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FootballFieldScreen()),
+                  );},
+            ),
+
           ],
         ),
       ),
