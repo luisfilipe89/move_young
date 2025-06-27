@@ -2,67 +2,59 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
-class FootballFieldScreen extends StatefulWidget {
-  const FootballFieldScreen({super.key});
+class BasketballCourtScreen extends StatefulWidget {
+  const BasketballCourtScreen({super.key});
 
   @override
-  State<FootballFieldScreen> createState() => _FootballFieldScreenState();
+  State<BasketballCourtScreen> createState() => _BasketballCourtScreenState();
 }
 
-class _FootballFieldScreenState extends State<FootballFieldScreen> {
+class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
   int? _expandedIndex;
 
-  final List<Map<String, String>> fields = [
+  final List<Map<String, String>> courts = [
     {
-      'name': 'Football Field Zuiderpark',
-      'type': 'Outdoor public artificial-turf football court',
-      'address': 'Loekemanstraat 1, 5213 HD Den Bosch',
-      'gps': '51.6875, 5.2850'
+      'name': "Playground Z'uitje",
+      'address': 'Westerparkstraat 4, Den Bosch',
+      'gps': '51.6922, 5.2850'
     },
   ];
 
   void _openMap(String lat, String lng) async {
     final uri = Uri.parse(
         'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=walking');
-
     if (await canLaunchUrl(uri)) {
-      final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open Google Maps')),
-        );
-      }
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid location or URL')),
-      );
+      throw 'Could not launch $uri';
     }
   }
 
   void _shareLocation(String name, String lat, String lng) {
-    final message = "Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lng";
+    final message =
+        "🏀 Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lng";
     Share.share(message);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Nearby Football Fields")),
+      appBar: AppBar(title: const Text("Nearby Basketball Courts")),
       body: ListView.builder(
-        itemCount: fields.length,
+        itemCount: courts.length,
         itemBuilder: (context, index) {
-          final field = fields[index];
+          final court = courts[index];
           final isExpanded = _expandedIndex == index;
-          final coords = field['gps']!.split(',');
+          final coords = court['gps']!.split(',');
           final lat = coords[0].trim();
           final lng = coords[1].trim();
 
           return Column(
             children: [
               ListTile(
-                leading: const Icon(Icons.location_on),
-                title: Text(field['name']!),
-                subtitle: Text(field['address']!),
+                leading: const Icon(Icons.sports_basketball),
+                title: Text(court['name']!),
+                subtitle: Text(court['address']!),
                 onTap: () {
                   setState(() {
                     _expandedIndex = isExpanded ? null : index;
@@ -79,8 +71,7 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
                       ElevatedButton.icon(
                         icon: const Icon(Icons.share),
                         label: const Text("Share"),
-                        onPressed: () => _shareLocation(
-                            field['name']!, lat, lng),
+                        onPressed: () => _shareLocation(court['name']!, lat, lng),
                       ),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.directions),

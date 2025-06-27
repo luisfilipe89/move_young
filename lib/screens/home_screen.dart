@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/activity_card.dart';
 import '../screens/fields/football_field_screen.dart';
-
+import '../screens/fields/basketball_court_screen.dart';
+import '../screens/fields/outdoor_fitness_screen.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -46,7 +47,11 @@ class HomeScreen extends StatelessWidget {
               buttonText: "JOIN",
               icon: Icons.sports_basketball,
               backgroundColor: Colors.teal,
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BasketballCourtScreen()),
+                  );},
             ),
             ActivityCard(
               title: "Free Football Field",
@@ -60,7 +65,18 @@ class HomeScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const FootballFieldScreen()),
                   );},
             ),
-
+            ActivityCard(
+              title: "Outdoor Fitness Zone",
+              subtitle: "Train in the fresh air",
+              buttonText: "JOIN",
+              icon: Icons.fitness_center,
+              backgroundColor: Colors.indigo,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const OutdoorFitnessScreen()),
+                  );},
+            ),
           ],
         ),
       ),

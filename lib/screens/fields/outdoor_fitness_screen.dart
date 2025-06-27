@@ -2,22 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 
-class FootballFieldScreen extends StatefulWidget {
-  const FootballFieldScreen({super.key});
+class OutdoorFitnessScreen extends StatefulWidget {
+  const OutdoorFitnessScreen({super.key});
 
   @override
-  State<FootballFieldScreen> createState() => _FootballFieldScreenState();
+  State<OutdoorFitnessScreen> createState() => _OutdoorFitnessScreenState();
 }
 
-class _FootballFieldScreenState extends State<FootballFieldScreen> {
+class _OutdoorFitnessScreenState extends State<OutdoorFitnessScreen> {
   int? _expandedIndex;
 
-  final List<Map<String, String>> fields = [
+  final List<Map<String, String>> zones = [
     {
-      'name': 'Football Field Zuiderpark',
-      'type': 'Outdoor public artificial-turf football court',
-      'address': 'Loekemanstraat 1, 5213 HD Den Bosch',
-      'gps': '51.6875, 5.2850'
+      'name': 'Fitness Park Paleiskwartier',
+      'address': 'Hoflaan 4, 5223 Den Bosch',
+      'gps': '51.6901, 5.2750'
+    },
+    {
+      'name': 'Outdoor Gym Maaspoort',
+      'address': 'Sportlaan 30, 5235 Den Bosch',
+      'gps': '51.7220, 5.2950'
     },
   ];
 
@@ -40,29 +44,29 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
   }
 
   void _shareLocation(String name, String lat, String lng) {
-    final message = "Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lng";
+    final message = "Let’s train at $name! 📍 https://maps.google.com/?q=$lat,$lng";
     Share.share(message);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Nearby Football Fields")),
+      appBar: AppBar(title: const Text("Outdoor Fitness Zones")),
       body: ListView.builder(
-        itemCount: fields.length,
+        itemCount: zones.length,
         itemBuilder: (context, index) {
-          final field = fields[index];
+          final zone = zones[index];
           final isExpanded = _expandedIndex == index;
-          final coords = field['gps']!.split(',');
+          final coords = zone['gps']!.split(',');
           final lat = coords[0].trim();
           final lng = coords[1].trim();
 
           return Column(
             children: [
               ListTile(
-                leading: const Icon(Icons.location_on),
-                title: Text(field['name']!),
-                subtitle: Text(field['address']!),
+                leading: const Icon(Icons.fitness_center),
+                title: Text(zone['name']!),
+                subtitle: Text(zone['address']!),
                 onTap: () {
                   setState(() {
                     _expandedIndex = isExpanded ? null : index;
@@ -71,16 +75,14 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
               ),
               if (isExpanded)
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton.icon(
                         icon: const Icon(Icons.share),
                         label: const Text("Share"),
-                        onPressed: () => _shareLocation(
-                            field['name']!, lat, lng),
+                        onPressed: () => _shareLocation(zone['name']!, lat, lng),
                       ),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.directions),
