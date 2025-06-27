@@ -64,6 +64,8 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
         final fields = elements.map<Map<String, dynamic>>((element) {
           final tags = element['tags'] ?? {};
           final name = tags['name'] ?? 'Unnamed Field';
+          final surface = tags['surface'];
+          final lit = tags['lit'];
           final lat = element['lat'] ?? element['center']?['lat'];
           final lon = element['lon'] ?? element['center']?['lon'];
           final distance = _calculateDistance(lat, lon);
@@ -73,10 +75,11 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
             'lat': lat.toString(),
             'lon': lon.toString(),
             'distance': distance,
+            'surface': surface,
+            'lit': lit,
           };
         }).toList();
 
-        // Sort by distance
         fields.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
 
         setState(() {
@@ -145,11 +148,40 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
                     final lat = field['lat']!;
                     final lon = field['lon']!;
                     final distance = field['distance'] as double;
+                    final surface = field['surface'] ?? 'Unknown';
+                    final lit = field['lit'] == 'yes';
                     final distanceStr = _formatDistance(distance);
 
                     return ListTile(
                       title: Text(name),
-                      subtitle: Text(distanceStr),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(distanceStr),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                surface.toLowerCase() == 'grass'
+                                    ? Icons.grass
+                                    : Icons.sports_soccer,
+                                size: 16,
+                                color: Colors.green,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(surface),
+                              const SizedBox(width: 12),
+                              Icon(
+                                lit ? Icons.lightbulb : Icons.lightbulb_outline,
+                                size: 16,
+                                color: Colors.amber,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(lit ? 'Lit' : 'Unlit'),
+                            ],
+                          ),
+                        ],
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
