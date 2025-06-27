@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:geolocator/geolocator.dart';
 
 class LiveFootballFieldScreen extends StatefulWidget {
   const LiveFootballFieldScreen({super.key});
@@ -12,14 +13,29 @@ class LiveFootballFieldScreen extends StatefulWidget {
 }
 
 class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
-  List<Map<String, String>> _fields = [];
+  List<Map<String, dynamic>> _fields = [];
   bool _isLoading = true;
   String? _error;
+  Position? _userPosition;
 
   @override
   void initState() {
     super.initState();
-    fetchFootballFields();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      await Geolocator.requestPermission();
+      final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      _userPosition = position;
+      await fetchFootballFields();
+    } catch (e) {
+      setState(() {
+        _error = 'Could not get user location: $e';
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> fetchFootballFields() async {
@@ -45,18 +61,26 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
         final jsonData = json.decode(response.body);
         final elements = jsonData['elements'] as List<dynamic>;
 
+        final fields = elements.map<Map<String, dynamic>>((element) {
+          final tags = element['tags'] ?? {};
+          final name = tags['name'] ?? 'Unnamed Field';
+          final lat = element['lat'] ?? element['center']?['lat'];
+          final lon = element['lon'] ?? element['center']?['lon'];
+          final distance = _calculateDistance(lat, lon);
+
+          return {
+            'name': name,
+            'lat': lat.toString(),
+            'lon': lon.toString(),
+            'distance': distance,
+          };
+        }).toList();
+
+        // Sort by distance
+        fields.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
+
         setState(() {
-          _fields = elements.map<Map<String, String>>((element) {
-            final tags = element['tags'] ?? {};
-            final name = tags['name'] ?? 'Unnamed Field';
-            final lat = element['lat'] ?? element['center']?['lat'];
-            final lon = element['lon'] ?? element['center']?['lon'];
-            return {
-              'name': name,
-              'lat': lat.toString(),
-              'lon': lon.toString(),
-            };
-          }).toList();
+          _fields = fields;
           _isLoading = false;
         });
       } else {
@@ -71,6 +95,16 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  double _calculateDistance(double? lat, double? lon) {
+    if (_userPosition == null || lat == null || lon == null) return double.infinity;
+    return Geolocator.distanceBetween(
+      _userPosition!.latitude,
+      _userPosition!.longitude,
+      lat,
+      lon,
+    );
   }
 
   void _openDirections(String lat, String lon) async {
@@ -89,6 +123,12 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
     Share.share(message);
   }
 
+  String _formatDistance(double distance) {
+    return distance < 1000
+        ? '${distance.toStringAsFixed(0)} m away'
+        : '${(distance / 1000).toStringAsFixed(1)} km away';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,21 +141,25 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
                   itemCount: _fields.length,
                   itemBuilder: (context, index) {
                     final field = _fields[index];
+                    final name = field['name'];
+                    final lat = field['lat']!;
+                    final lon = field['lon']!;
+                    final distance = field['distance'] as double;
+                    final distanceStr = _formatDistance(distance);
+
                     return ListTile(
-                      title: Text(field['name']!),
-                      subtitle: Text('${field['lat']}, ${field['lon']}'),
+                      title: Text(name),
+                      subtitle: Text(distanceStr),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
                             icon: const Icon(Icons.share),
-                            onPressed: () => _shareLocation(
-                                field['name']!, field['lat']!, field['lon']!),
+                            onPressed: () => _shareLocation(name, lat, lon),
                           ),
                           IconButton(
                             icon: const Icon(Icons.directions),
-                            onPressed: () => _openDirections(
-                                field['lat']!, field['lon']!),
+                            onPressed: () => _openDirections(lat, lon),
                           ),
                         ],
                       ),
