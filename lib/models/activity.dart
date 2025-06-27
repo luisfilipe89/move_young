@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Activity {
   final String title;
   final String subtitle;

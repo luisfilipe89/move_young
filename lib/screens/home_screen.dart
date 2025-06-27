@@ -3,6 +3,8 @@ import '../widgets/activity_card.dart';
 import '../screens/fields/football_field_screen.dart';
 import '../screens/fields/basketball_court_screen.dart';
 import '../screens/fields/outdoor_fitness_screen.dart';
+import '../screens/fields/live_football_field_screen.dart';
+
 
 
 class HomeScreen extends StatelessWidget {
@@ -75,6 +77,18 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const OutdoorFitnessScreen()),
+                  );},
+            ),
+            ActivityCard(
+              title: "Live Football Fields",
+              subtitle: "From Open Data",
+              buttonText: "EXPLORE",
+              icon: Icons.public,
+              backgroundColor: Colors.blueGrey,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LiveFootballFieldScreen()),
                   );},
             ),
           ],
