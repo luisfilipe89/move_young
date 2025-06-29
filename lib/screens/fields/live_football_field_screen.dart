@@ -13,10 +13,16 @@ class LiveFootballFieldScreen extends StatefulWidget {
 }
 
 class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
-  List<Map<String, dynamic>> _fields = [];
+  List<Map<String, dynamic>> _allFields = [];
+  List<Map<String, dynamic>> _filteredFields = [];
   bool _isLoading = true;
   String? _error;
   Position? _userPosition;
+
+  // Filter states
+  bool _onlyGrass = false;
+  bool _onlyLit = false;
+  bool _onlyArtificialTurf = false;
 
   @override
   void initState() {
@@ -39,7 +45,6 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
   }
 
   Future<void> fetchFootballFields() async {
-    const overpassUrl = "https://overpass-api.de/api/interpreter";
     const query = """
     [out:json][timeout:25];
     area["name"="'s-Hertogenbosch"]->.searchArea;
@@ -52,7 +57,7 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse(overpassUrl),
+        Uri.parse("https://overpass-api.de/api/interpreter"),
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {'data': query},
       );
@@ -83,7 +88,8 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
         fields.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
 
         setState(() {
-          _fields = fields;
+          _allFields = fields;
+          _applyFilters();
           _isLoading = false;
         });
       } else {
@@ -98,6 +104,20 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _applyFilters() {
+    _filteredFields = _allFields.where((field) {
+      final surface = field['surface']?.toLowerCase();
+      final isGrass = surface == 'grass';
+      final isArtificial = surface != null && surface.contains('artificial');
+      final isLit = field['lit'] == 'yes';
+
+      if (_onlyGrass && !isGrass) return false;
+      if (_onlyArtificialTurf && !isArtificial) return false;
+      if (_onlyLit && !isLit) return false;
+      return true;
+    }).toList();
   }
 
   double _calculateDistance(double? lat, double? lon) {
@@ -135,15 +155,49 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Live Football Fields")),
+      appBar: AppBar(
+        title: const Text("Live Football Fields"),
+        actions: [
+          IconButton(
+            icon: Icon(_onlyGrass ? Icons.grass : Icons.grass_outlined),
+            tooltip: "Toggle Grass",
+            onPressed: () {
+              setState(() {
+                _onlyGrass = !_onlyGrass;
+                _applyFilters();
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(_onlyArtificialTurf ? Icons.extension : Icons.extension_outlined),
+            tooltip: "Toggle Artificial Turf",
+            onPressed: () {
+              setState(() {
+                _onlyArtificialTurf = !_onlyArtificialTurf;
+                _applyFilters();
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(_onlyLit ? Icons.lightbulb : Icons.lightbulb_outline),
+            tooltip: "Toggle Lit Fields",
+            onPressed: () {
+              setState(() {
+                _onlyLit = !_onlyLit;
+                _applyFilters();
+              });
+            },
+          ),
+        ],
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(child: Text(_error!))
               : ListView.builder(
-                  itemCount: _fields.length,
+                  itemCount: _filteredFields.length,
                   itemBuilder: (context, index) {
-                    final field = _fields[index];
+                    final field = _filteredFields[index];
                     final name = field['name'];
                     final lat = field['lat']!;
                     final lon = field['lon']!;
@@ -151,6 +205,17 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
                     final surface = field['surface'] ?? 'Unknown';
                     final lit = field['lit'] == 'yes';
                     final distanceStr = _formatDistance(distance);
+
+                    final surfaceLower = surface.toLowerCase();
+
+                    Icon surfaceIcon;
+                    if (surfaceLower == 'grass') {
+                      surfaceIcon = const Icon(Icons.grass, size: 16, color: Colors.green);
+                    } else if (surfaceLower.contains('artificial')) {
+                      surfaceIcon = const Icon(Icons.extension, size: 16, color: Colors.green);
+                    } else {
+                      surfaceIcon = const Icon(Icons.sports_soccer, size: 16, color: Colors.lightBlueAccent);
+                    }
 
                     return ListTile(
                       title: Text(name),
@@ -161,13 +226,7 @@ class _LiveFootballFieldScreenState extends State<LiveFootballFieldScreen> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Icon(
-                                surface.toLowerCase() == 'grass'
-                                    ? Icons.grass
-                                    : Icons.sports_soccer,
-                                size: 16,
-                                color: Colors.green,
-                              ),
+                              surfaceIcon,
                               const SizedBox(width: 4),
                               Text(surface),
                               const SizedBox(width: 12),
