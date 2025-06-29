@@ -2,41 +2,43 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class OverpassService {
-  static Future<List<Map<String, dynamic>>> fetchSoccerFields() async {
+  static Future<List<Map<String, dynamic>>> fetchFields({
+    required String areaName,
+    required String sportType,
+  }) async {
     final query = """
-      [out:json][timeout:25];
-      area["name"="'s-Hertogenbosch"]->.searchArea;
-      (
-        node["leisure"="pitch"]["sport"="soccer"](area.searchArea);
-        way["leisure"="pitch"]["sport"="soccer"](area.searchArea);
-      );
-      out center tags;
+    [out:json][timeout:25];
+    area["name"="$areaName"]->.searchArea;
+    (
+      node["leisure"="pitch"]["sport"="$sportType"]["access"!="private"](area.searchArea);
+      way["leisure"="pitch"]["sport"="$sportType"]["access"!="private"](area.searchArea);
+    );
+    out center tags;
     """;
 
     final response = await http.post(
       Uri.parse('https://overpass-api.de/api/interpreter'),
+      headers: {"Content-Type": "application/x-www-form-urlencoded"},
       body: {'data': query},
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final elements = data['elements'] as List<dynamic>;
-
-      return elements.map<Map<String, dynamic>>((e) {
-        final tags = e['tags'] ?? {};
-        final name = _getDisplayName(tags);
-
-        return {
-          'id': e['id'],
-          'lat': e['lat'] ?? e['center']?['lat'],
-          'lon': e['lon'] ?? e['center']?['lon'],
-          'name': name,
-          'tags': tags,
-        };
-      }).toList();
-    } else {
-      throw Exception('Failed to fetch soccer fields');
+    if (response.statusCode != 200) {
+      throw Exception('Overpass API error: ${response.statusCode}');
     }
-  }
 
-  static String _g_
+    final data = jsonDecode(response.body);
+    final elements = data['elements'] as List<dynamic>;
+
+    return elements.map<Map<String, dynamic>>((element) {
+      final tags = element['tags'] ?? {};
+      return {
+        'name': tags['name'] ?? 'Unnamed Field',
+        'lat': element['lat'] ?? element['center']?['lat'],
+        'lon': element['lon'] ?? element['center']?['lon'],
+        'surface': tags['surface'],
+        'lit': tags['lit'],
+        'tags': tags,
+      };
+    }).where((e) => e['lat'] != null && e['lon'] != null).toList();
+  }
+}

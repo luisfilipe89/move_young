@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../services/overpass_service.dart';
 
 class FootballFieldScreen extends StatefulWidget {
   const FootballFieldScreen({super.key});
@@ -10,91 +12,199 @@ class FootballFieldScreen extends StatefulWidget {
 }
 
 class _FootballFieldScreenState extends State<FootballFieldScreen> {
-  int? _expandedIndex;
+  List<Map<String, dynamic>> _allFields = [];
+  List<Map<String, dynamic>> _filteredFields = [];
+  bool _isLoading = true;
+  String? _error;
+  Position? _userPosition;
 
-  final List<Map<String, String>> fields = [
-    {
-      'name': 'Football Field Zuiderpark',
-      'type': 'Outdoor public artificial-turf football court',
-      'address': 'Loekemanstraat 1, 5213 HD Den Bosch',
-      'gps': '51.6875, 5.2850'
-    },
-  ];
+  // Filter states
+  bool _onlyGrass = false;
+  bool _onlyArtificial = false;
+  bool _onlyLit = false;
 
-  void _openMap(String lat, String lng) async {
-    final uri = Uri.parse(
-        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=walking');
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
 
-    if (await canLaunchUrl(uri)) {
-      final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open Google Maps')),
-        );
+  Future<void> _loadData() async {
+    try {
+      await Geolocator.requestPermission();
+      _userPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      final fields = await OverpassService.fetchFields(
+        areaName: "'s-Hertogenbosch",
+        sportType: "soccer",
+      );
+
+      for (var field in fields) {
+        final lat = field['lat'];
+        final lon = field['lon'];
+        field['distance'] = _calculateDistance(lat, lon);
       }
+
+      fields.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
+
+      setState(() {
+        _allFields = fields;
+        _applyFilters();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to load data: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _applyFilters() {
+    _filteredFields = _allFields.where((field) {
+      final surface = (field['surface'] ?? '').toLowerCase();
+      final lit = field['lit'] == 'yes';
+
+      if (_onlyGrass && surface != 'grass') return false;
+      if (_onlyArtificial && surface != 'artificial_turf') return false;
+      if (_onlyLit && !lit) return false;
+
+      return true;
+    }).toList();
+  }
+
+  double _calculateDistance(double? lat, double? lon) {
+    if (_userPosition == null || lat == null || lon == null) return double.infinity;
+    return Geolocator.distanceBetween(
+      _userPosition!.latitude,
+      _userPosition!.longitude,
+      lat,
+      lon,
+    );
+  }
+
+  void _openDirections(String lat, String lon) async {
+    final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid location or URL')),
+        const SnackBar(content: Text('Could not open Google Maps')),
       );
     }
   }
 
-  void _shareLocation(String name, String lat, String lng) {
-    final message = "Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lng";
+  void _shareLocation(String name, String lat, String lon) {
+    final message = "Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lon";
     Share.share(message);
+  }
+
+  String _formatDistance(double distance) {
+    return distance < 1000
+        ? '${distance.toStringAsFixed(0)} m away'
+        : '${(distance / 1000).toStringAsFixed(1)} km away';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Nearby Football Fields")),
-      body: ListView.builder(
-        itemCount: fields.length,
-        itemBuilder: (context, index) {
-          final field = fields[index];
-          final isExpanded = _expandedIndex == index;
-          final coords = field['gps']!.split(',');
-          final lat = coords[0].trim();
-          final lng = coords[1].trim();
-
-          return Column(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.location_on),
-                title: Text(field['name']!),
-                subtitle: Text(field['address']!),
-                onTap: () {
-                  setState(() {
-                    _expandedIndex = isExpanded ? null : index;
-                  });
-                },
-              ),
-              if (isExpanded)
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.share),
-                        label: const Text("Share"),
-                        onPressed: () => _shareLocation(
-                            field['name']!, lat, lng),
-                      ),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.directions),
-                        label: const Text("Directions"),
-                        onPressed: () => _openMap(lat, lng),
-                      ),
-                    ],
-                  ),
-                ),
-              const Divider(height: 1),
-            ],
-          );
-        },
+      appBar: AppBar(
+        title: const Text("Football Fields"),
+        actions: [
+          IconButton(
+            icon: Icon(_onlyGrass ? Icons.grass : Icons.grass_outlined),
+            tooltip: "Toggle Grass",
+            onPressed: () {
+              setState(() {
+                _onlyGrass = !_onlyGrass;
+                _applyFilters();
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(_onlyArtificial ? Icons.extension : Icons.extension_outlined),
+            tooltip: "Toggle Artificial Turf",
+            onPressed: () {
+              setState(() {
+                _onlyArtificial = !_onlyArtificial;
+                _applyFilters();
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(_onlyLit ? Icons.lightbulb : Icons.lightbulb_outline),
+            tooltip: "Toggle Lit Fields",
+            onPressed: () {
+              setState(() {
+                _onlyLit = !_onlyLit;
+                _applyFilters();
+              });
+            },
+          ),
+        ],
       ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
+              ? Center(child: Text(_error!))
+              : ListView.builder(
+                  itemCount: _filteredFields.length,
+                  itemBuilder: (context, index) {
+                    final field = _filteredFields[index];
+                    final name = field['name'];
+                    final lat = field['lat'].toString();
+                    final lon = field['lon'].toString();
+                    final distance = field['distance'] as double;
+                    final surface = field['surface'] ?? 'Unknown';
+                    final lit = field['lit'] == 'yes';
+
+                    return ListTile(
+                      title: Text(name),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_formatDistance(distance)),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                surface.toLowerCase() == 'grass'
+                                    ? Icons.grass
+                                    : surface.toLowerCase() == 'artificial_turf'
+                                        ? Icons.extension
+                                        : Icons.sports_soccer,
+                                size: 16,
+                                color: Colors.green,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(surface),
+                              const SizedBox(width: 12),
+                              Icon(
+                                lit ? Icons.lightbulb : Icons.lightbulb_outline,
+                                size: 16,
+                                color: Colors.amber,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(lit ? 'Lit' : 'Unlit'),
+                            ],
+                          ),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.share),
+                            onPressed: () => _shareLocation(name, lat, lon),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.directions),
+                            onPressed: () => _openDirections(lat, lon),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }

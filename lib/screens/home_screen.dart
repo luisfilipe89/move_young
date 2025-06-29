@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import '../widgets/activity_card.dart';
 import '../screens/fields/football_field_screen.dart';
 import '../screens/fields/basketball_court_screen.dart';
-import '../screens/fields/outdoor_fitness_screen.dart';
-import '../screens/fields/live_football_field_screen.dart';
-
-
+import '../screens/fields/fitness_outdoor_screen.dart';
+import 'fields/football_field_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -68,7 +66,7 @@ class HomeScreen extends StatelessWidget {
                   );},
             ),
             ActivityCard(
-              title: "Outdoor Fitness Zone",
+              title: "Fitness Outdoor Zone",
               subtitle: "Train in the fresh air",
               buttonText: "JOIN",
               icon: Icons.fitness_center,
@@ -76,19 +74,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const OutdoorFitnessScreen()),
-                  );},
-            ),
-            ActivityCard(
-              title: "Live Football Fields",
-              subtitle: "From Open Data",
-              buttonText: "EXPLORE",
-              icon: Icons.public,
-              backgroundColor: Colors.blueGrey,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LiveFootballFieldScreen()),
+                  MaterialPageRoute(builder: (context) => const FitnessOutdoorScreen()),
                   );},
             ),
           ],
