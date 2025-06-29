@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/overpass_service.dart';
-import '../../utils/navigation_utils.dart';
 
 class FootballFieldScreen extends StatefulWidget {
   const FootballFieldScreen({super.key});
@@ -17,10 +18,12 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
   String? _error;
   Position? _userPosition;
 
-  // Filter states
   bool _onlyGrass = false;
   bool _onlyArtificial = false;
   bool _onlyLit = false;
+
+  TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -28,11 +31,16 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
     _loadData();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadData() async {
     try {
       await Geolocator.requestPermission();
       _userPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-
       final fields = await OverpassService.fetchFields(
         areaName: "'s-Hertogenbosch",
         sportType: "soccer",
@@ -63,10 +71,18 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
     _filteredFields = _allFields.where((field) {
       final surface = (field['surface'] ?? '').toLowerCase();
       final lit = field['lit'] == 'yes';
+      final name = (field['name'] ?? '').toLowerCase();
+      final address = (field['addr:street'] ?? '').toLowerCase();
 
       if (_onlyGrass && surface != 'grass') return false;
       if (_onlyArtificial && surface != 'artificial_turf') return false;
       if (_onlyLit && !lit) return false;
+
+      if (_searchQuery.isNotEmpty &&
+          !name.contains(_searchQuery.toLowerCase()) &&
+          !address.contains(_searchQuery.toLowerCase())) {
+        return false;
+      }
 
       return true;
     }).toList();
@@ -82,6 +98,22 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
     );
   }
 
+  void _openDirections(String lat, String lon) async {
+    final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open Google Maps')),
+      );
+    }
+  }
+
+  void _shareLocation(String name, String lat, String lon) {
+    final message = "Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lon";
+    Share.share(message);
+  }
+
   String _formatDistance(double distance) {
     return distance < 1000
         ? '${distance.toStringAsFixed(0)} m away'
@@ -92,7 +124,21 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Football Fields"),
+        title: TextField(
+          controller: _searchController,
+          decoration: const InputDecoration(
+            hintText: 'Search fields...',
+            border: InputBorder.none,
+            hintStyle: TextStyle(color: Colors.white70),
+          ),
+          style: const TextStyle(color: Colors.white),
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value;
+              _applyFilters();
+            });
+          },
+        ),
         actions: [
           IconButton(
             icon: Icon(_onlyGrass ? Icons.grass : Icons.grass_outlined),
@@ -178,11 +224,11 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.share),
-                            onPressed: () => NavigationUtils.shareLocation(name, lat, lon),
+                            onPressed: () => _shareLocation(name, lat, lon),
                           ),
                           IconButton(
                             icon: const Icon(Icons.directions),
-                            onPressed: () => NavigationUtils.openDirections(context, lat, lon),
+                            onPressed: () => _openDirections(lat, lon),
                           ),
                         ],
                       ),
