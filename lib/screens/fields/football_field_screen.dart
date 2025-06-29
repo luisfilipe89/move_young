@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../services/overpass_service.dart';
+import '../maps/football_field_map_screen.dart';
 
 class FootballFieldScreen extends StatefulWidget {
   const FootballFieldScreen({super.key});
@@ -40,7 +41,8 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
   Future<void> _loadData() async {
     try {
       await Geolocator.requestPermission();
-      _userPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      _userPosition = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
       final fields = await OverpassService.fetchFields(
         areaName: "'s-Hertogenbosch",
         sportType: "soccer",
@@ -52,7 +54,8 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
         field['distance'] = _calculateDistance(lat, lon);
       }
 
-      fields.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
+      fields.sort(
+          (a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
 
       setState(() {
         _allFields = fields;
@@ -89,7 +92,9 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
   }
 
   double _calculateDistance(double? lat, double? lon) {
-    if (_userPosition == null || lat == null || lon == null) return double.infinity;
+    if (_userPosition == null || lat == null || lon == null) {
+      return double.infinity;
+    }
     return Geolocator.distanceBetween(
       _userPosition!.latitude,
       _userPosition!.longitude,
@@ -99,7 +104,8 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
   }
 
   void _openDirections(String lat, String lon) async {
-    final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
+    final url =
+        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
@@ -177,6 +183,7 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
           : _error != null
               ? Center(child: Text(_error!))
               : ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 80),
                   itemCount: _filteredFields.length,
                   itemBuilder: (context, index) {
                     final field = _filteredFields[index];
@@ -235,6 +242,18 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
                     );
                   },
                 ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FootballFieldMapScreen(fields: _filteredFields),
+            ),
+          );
+        },
+        child: const Icon(Icons.map),
+        tooltip: 'View All on Map',
+      ),
     );
   }
 }

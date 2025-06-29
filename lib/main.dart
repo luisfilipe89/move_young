@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
-void main() => runApp(const MoveYoungApp());
+void main() {
+  runApp(const MoveYoungApp());
+}
 
 class MoveYoungApp extends StatelessWidget {
   const MoveYoungApp({super.key});
@@ -10,7 +12,7 @@ class MoveYoungApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MoveYoung',
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false, 
       home: const HomeScreen(),
     );
   }
