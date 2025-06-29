@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../services/overpass_service.dart';
+import '../../utils/navigation_utils.dart';
 
 class FootballFieldScreen extends StatefulWidget {
   const FootballFieldScreen({super.key});
@@ -33,6 +32,7 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
     try {
       await Geolocator.requestPermission();
       _userPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
       final fields = await OverpassService.fetchFields(
         areaName: "'s-Hertogenbosch",
         sportType: "soccer",
@@ -80,22 +80,6 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
       lat,
       lon,
     );
-  }
-
-  void _openDirections(String lat, String lon) async {
-    final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open Google Maps')),
-      );
-    }
-  }
-
-  void _shareLocation(String name, String lat, String lon) {
-    final message = "Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lon";
-    Share.share(message);
   }
 
   String _formatDistance(double distance) {
@@ -194,11 +178,11 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.share),
-                            onPressed: () => _shareLocation(name, lat, lon),
+                            onPressed: () => NavigationUtils.shareLocation(name, lat, lon),
                           ),
                           IconButton(
                             icon: const Icon(Icons.directions),
-                            onPressed: () => _openDirections(lat, lon),
+                            onPressed: () => NavigationUtils.openDirections(context, lat, lon),
                           ),
                         ],
                       ),

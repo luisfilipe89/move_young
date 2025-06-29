@@ -55,7 +55,7 @@ class HomeScreen extends StatelessWidget {
             ),
             ActivityCard(
               title: "Free Football Field",
-              subtitle: "Open today",
+              subtitle: "Choose Field and Invite Friends",
               buttonText: "JOIN",
               icon: Icons.sports_soccer,
               backgroundColor: Colors.green,
