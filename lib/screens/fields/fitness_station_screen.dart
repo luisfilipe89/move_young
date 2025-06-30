@@ -19,7 +19,6 @@ class _FitnessStationScreenState extends State<FitnessStationScreen> {
   String? _error;
   Position? _userPosition;
 
-  bool _onlyPublic = false;
   TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -42,7 +41,7 @@ class _FitnessStationScreenState extends State<FitnessStationScreen> {
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      final stations = await OverpassService.fetchFitnessZones(
+      final stations = await OverpassService.fetchFitnessStations(
         areaName: "'s-Hertogenbosch",
       );
 
@@ -52,7 +51,6 @@ class _FitnessStationScreenState extends State<FitnessStationScreen> {
 
         if (station['name'] == null || station['name'].toString().trim().isEmpty) {
           station['name'] = '${lat.toStringAsFixed(5)}, ${lon.toStringAsFixed(5)}';
-          // station['name'] = await ReverseGeocoding.getStreetName(lat, lon) ?? station['name'];
         }
 
         station['distance'] = _calculateDistance(lat, lon);
@@ -75,11 +73,14 @@ class _FitnessStationScreenState extends State<FitnessStationScreen> {
 
   void _applyFilters() {
     _filteredStations = _allStations.where((station) {
-      final access = (station['tags']?['access'] ?? '').toLowerCase();
       final name = (station['name'] ?? '').toLowerCase();
+      final equipment = (station['equipment'] ?? '').toLowerCase();
 
-      if (_onlyPublic && access != 'yes' && access != 'public') return false;
-      if (_searchQuery.isNotEmpty && !name.contains(_searchQuery.toLowerCase())) return false;
+      if (_searchQuery.isNotEmpty &&
+          !name.contains(_searchQuery.toLowerCase()) &&
+          !equipment.contains(_searchQuery.toLowerCase())) {
+        return false;
+      }
 
       return true;
     }).toList();
@@ -107,7 +108,7 @@ class _FitnessStationScreenState extends State<FitnessStationScreen> {
   }
 
   void _shareLocation(String name, String lat, String lon) {
-    final message = "Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lon";
+    final message = "Let's work out here! 💪 $name 📍 https://maps.google.com/?q=$lat,$lon";
     Share.share(message);
   }
 
@@ -136,18 +137,6 @@ class _FitnessStationScreenState extends State<FitnessStationScreen> {
             });
           },
         ),
-        actions: [
-          IconButton(
-            icon: Icon(_onlyPublic ? Icons.lock_open : Icons.lock_outline),
-            tooltip: "Toggle Public Access",
-            onPressed: () {
-              setState(() {
-                _onlyPublic = !_onlyPublic;
-                _applyFilters();
-              });
-            },
-          ),
-        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -162,10 +151,18 @@ class _FitnessStationScreenState extends State<FitnessStationScreen> {
                     final lat = station['lat'].toString();
                     final lon = station['lon'].toString();
                     final distance = station['distance'] as double;
+                    final equipment = station['equipment'] ?? 'General Fitness';
 
                     return ListTile(
                       title: Text(name),
-                      subtitle: Text(_formatDistance(distance)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(_formatDistance(distance)),
+                          const SizedBox(height: 4),
+                          Text('Equipment: $equipment'),
+                        ],
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -188,7 +185,7 @@ class _FitnessStationScreenState extends State<FitnessStationScreen> {
             context,
             MaterialPageRoute(
               builder: (_) => GenericMapScreen(
-                title: 'Fitness Zones',
+                title: 'Fitness Stations',
                 locations: _filteredStations,
               ),
             ),

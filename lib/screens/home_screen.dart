@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../widgets/activity_card.dart';
 import '../screens/fields/football_field_screen.dart';
 import '../screens/fields/basketball_court_screen.dart';
-import '../screens/fields/fitness_outdoor_screen.dart';
-import 'fields/football_field_screen.dart';
+import '../screens/fields/fitness_station_screen.dart';
+
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -74,7 +74,7 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const FitnessOutdoorScreen()),
+                  MaterialPageRoute(builder: (context) => const FitnessStationScreen()),
                   );},
             ),
           ],

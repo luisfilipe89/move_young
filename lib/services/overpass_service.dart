@@ -41,4 +41,44 @@ class OverpassService {
       };
     }).where((e) => e['lat'] != null && e['lon'] != null).toList();
   }
+
+  /// ✅ NEW FUNCTION: Fetches fitness stations (outdoor gyms)
+  static Future<List<Map<String, dynamic>>> fetchFitnessStations({
+    required String areaName,
+  }) async {
+    final query = """
+    [out:json][timeout:25];
+    area["name"="$areaName"]->.searchArea;
+    (
+      node["leisure"="fitness_station"]["access"!="private"](area.searchArea);
+      way["leisure"="fitness_station"]["access"!="private"](area.searchArea);
+    );
+    out center tags;
+    """;
+
+    final response = await http.post(
+      Uri.parse('https://overpass-api.de/api/interpreter'),
+      headers: {"Content-Type": "application/x-www-form-urlencoded"},
+      body: {'data': query},
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Overpass API error: ${response.statusCode}');
+    }
+
+    final data = jsonDecode(response.body);
+    final elements = data['elements'] as List<dynamic>;
+
+    return elements.map<Map<String, dynamic>>((element) {
+      final tags = element['tags'] ?? {};
+      return {
+        'name': tags['name'] ?? 'Unnamed Station',
+        'lat': element['lat'] ?? element['center']?['lat'],
+        'lon': element['lon'] ?? element['center']?['lon'],
+        'equipment': tags['equipment'],
+        'outdoor': tags['outdoor'],
+        'tags': tags,
+      };
+    }).where((e) => e['lat'] != null && e['lon'] != null).toList();
+  }
 }
