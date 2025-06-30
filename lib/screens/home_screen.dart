@@ -3,6 +3,8 @@ import '../widgets/activity_card.dart';
 import '../screens/fields/football_field_screen.dart';
 import '../screens/fields/basketball_court_screen.dart';
 import '../screens/fields/fitness_station_screen.dart';
+import '../screens/fields/games_corner_screen.dart';
+import '../screens/fields/skate&bmx_screen.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -75,6 +77,30 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const FitnessStationScreen()),
+                  );},
+            ),
+            ActivityCard(
+              title: "Park Games",
+              subtitle: "Fun activities in the park",
+              buttonText: "JOIN",
+              icon: Icons.park,
+              backgroundColor: Colors.purple,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GamesCornerScreen()),
+                  );},
+            ),
+            ActivityCard(
+              title: "Skate & BMX Park",
+              subtitle: "Explore skateparks and BMX ramps",
+              buttonText: "JOIN",
+              icon: Icons.directions_bike,
+              backgroundColor: Colors.orangeAccent,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SkateBmxScreen()),
                   );},
             ),
           ],
