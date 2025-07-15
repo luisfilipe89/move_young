@@ -5,6 +5,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:move_young/services/overpass_service.dart';
 import 'package:move_young/screens/maps/generic_map_screen.dart';
 import 'package:move_young/utils/reverse_geocoding.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:move_young/screens/image_preview_screen.dart';
+
 
 class BasketballCourtScreen extends StatefulWidget {
   const BasketballCourtScreen({super.key});
@@ -25,8 +28,7 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-
-  final Map<String, String> _locationCache = {}; // NEW cache map
+  final Map<String, String> _locationCache = {};
 
   @override
   void initState() {
@@ -55,7 +57,6 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
       for (var court in courts) {
         final lat = court['lat'];
         final lon = court['lon'];
-
         court['distance'] = _calculateDistance(lat, lon);
       }
 
@@ -204,8 +205,36 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
                     final surface = court['surface'] ?? 'Unknown';
                     final lit = court['lit'] == 'yes';
                     final hoops = court['tags']?['hoops'] ?? 'Unknown';
+                    final imageUrl = court['tags']?['image'];
 
                     return ListTile(
+                      leading: imageUrl != null
+                          ? GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ImagePreviewScreen(imageUrl: imageUrl),
+                                  ),
+                                );
+                              },
+                              child: CachedNetworkImage(
+                                imageUrl: imageUrl,
+                                width: 100,
+                                height: 70,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) =>
+                                    const Center(child: CircularProgressIndicator()),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.broken_image),
+                              ),
+                            )
+                          : Container(
+                              width: 100,
+                              height: 70,
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                            ),
                       title: FutureBuilder<String>(
                         future: _getDisplayName(court),
                         builder: (context, snapshot) {
