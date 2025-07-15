@@ -6,7 +6,7 @@ import 'package:move_young/services/overpass_service.dart';
 import 'package:move_young/screens/maps/generic_map_screen.dart';
 import 'package:move_young/utils/reverse_geocoding.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:move_young/screens/image_preview_screen.dart';
+import 'package:move_young/screens/principals/image_preview_screen.dart';
 
 
 class BasketballCourtScreen extends StatefulWidget {
