@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../widgets/activity_card.dart';
-import '../screens/fields/football_field_screen.dart';
-import '../screens/fields/basketball_court_screen.dart';
-import '../screens/fields/fitness_station_screen.dart';
-import '../screens/fields/games_corner_screen.dart';
-import '../screens/fields/skate&bmx_screen.dart';
+import 'package:move_young/widgets/activity_card.dart';
+import 'package:move_young/screens/fields/football_field_screen.dart';
+import 'package:move_young/screens/fields/basketball_court_screen.dart';
+import 'package:move_young/screens/fields/fitness_station_screen.dart';
+import 'package:move_young/screens/fields/games_corner_screen.dart';
+import 'package:move_young/screens/fields/skate_bmx_screen.dart';
 
 
 class HomeScreen extends StatelessWidget {

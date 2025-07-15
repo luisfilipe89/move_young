@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../services/overpass_service.dart';
-import '../maps/generic_map_screen.dart';
+import 'package:move_young/services/overpass_service.dart';
+import 'package:move_young/screens/maps/generic_map_screen.dart';
 
 class FootballFieldScreen extends StatefulWidget {
   const FootballFieldScreen({super.key});
@@ -23,7 +23,7 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
   bool _onlyArtificial = false;
   bool _onlyLit = false;
 
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
   @override
@@ -109,9 +109,12 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
 
   void _openDirections(String lat, String lon) async {
     final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    final uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not open Google Maps')),
       );
@@ -257,8 +260,8 @@ class _FootballFieldScreenState extends State<FootballFieldScreen> {
             ),
           );
         },
-        child: const Icon(Icons.map),
         tooltip: 'View All on Map',
+        child: const Icon(Icons.map),
       ),
     );
   }

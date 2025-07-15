@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../services/overpass_service.dart';
-import '../maps/generic_map_screen.dart';
+import 'package:move_young/services/overpass_service.dart';
+import 'package:move_young/screens/maps/generic_map_screen.dart';
+import 'package:move_young/utils/reverse_geocoding.dart';
 
 class BasketballCourtScreen extends StatefulWidget {
   const BasketballCourtScreen({super.key});
@@ -22,8 +23,10 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
   bool _onlyConcrete = false;
   bool _onlyLit = false;
 
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+
+  final Map<String, String> _locationCache = {}; // NEW cache map
 
   @override
   void initState() {
@@ -49,18 +52,9 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
         sportType: "basketball",
       );
 
-      print('✅ Fetched ${courts.length} courts from Overpass');
-      for (var c in courts) {
-        print("📍 ${c['name']} - lat: ${c['lat']}, lon: ${c['lon']}");
-      }
-
       for (var court in courts) {
         final lat = court['lat'];
         final lon = court['lon'];
-
-        if (court['name'] == null || court['name'].toString().trim().isEmpty) {
-          court['name'] = '${lat.toStringAsFixed(5)}, ${lon.toStringAsFixed(5)}';
-        }
 
         court['distance'] = _calculateDistance(lat, lon);
       }
@@ -81,8 +75,6 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
   }
 
   void _applyFilters() {
-    print("🔍 Applying filters on ${_allCourts.length} courts");
-
     _filteredCourts = _allCourts.where((court) {
       final surface = (court['surface'] ?? '').toLowerCase();
       final lit = court['lit'] == 'yes';
@@ -100,8 +92,6 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
 
       return true;
     }).toList();
-
-    print("✅ After filters: ${_filteredCourts.length} courts remain");
   }
 
   double _calculateDistance(double? lat, double? lon) {
@@ -116,9 +106,12 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
 
   void _openDirections(String lat, String lon) async {
     final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    final uri = Uri.parse(url);
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not open Google Maps')),
       );
@@ -134,6 +127,24 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
     return distance < 1000
         ? '${distance.toStringAsFixed(0)} m away'
         : '${(distance / 1000).toStringAsFixed(1)} km away';
+  }
+
+  Future<String> _getDisplayName(Map<String, dynamic> court) async {
+    if (court['name'] != null && court['name'].toString().trim().isNotEmpty) {
+      return court['name'];
+    }
+
+    final lat = court['lat'];
+    final lon = court['lon'];
+    final key = '$lat,$lon';
+
+    if (_locationCache.containsKey(key)) {
+      return _locationCache[key]!;
+    }
+
+    final streetName = await getNearestStreetName(lat, lon);
+    _locationCache[key] = streetName;
+    return streetName;
   }
 
   @override
@@ -187,7 +198,6 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
                   itemCount: _filteredCourts.length,
                   itemBuilder: (context, index) {
                     final court = _filteredCourts[index];
-                    final name = court['name'];
                     final lat = court['lat'].toString();
                     final lon = court['lon'].toString();
                     final distance = court['distance'] as double;
@@ -196,7 +206,16 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
                     final hoops = court['tags']?['hoops'] ?? 'Unknown';
 
                     return ListTile(
-                      title: Text(name),
+                      title: FutureBuilder<String>(
+                        future: _getDisplayName(court),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Text('Loading name...');
+                          } else {
+                            return Text(snapshot.data ?? 'Unnamed Location');
+                          }
+                        },
+                      ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -234,7 +253,10 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.share),
-                            onPressed: () => _shareLocation(name, lat, lon),
+                            onPressed: () async {
+                              final name = await _getDisplayName(court);
+                              _shareLocation(name, lat, lon);
+                            },
                           ),
                           IconButton(
                             icon: const Icon(Icons.directions),
@@ -247,11 +269,6 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
                 ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print('📤 Sending ${_filteredCourts.length} courts to map');
-          for (var c in _filteredCourts) {
-            print("🗺 ${c['name']} - lat: ${c['lat']}, lon: ${c['lon']}");
-          }
-
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -262,8 +279,8 @@ class _BasketballCourtScreenState extends State<BasketballCourtScreen> {
             ),
           );
         },
-        child: const Icon(Icons.map),
         tooltip: 'View All on Map',
+        child: const Icon(Icons.map),
       ),
     );
   }

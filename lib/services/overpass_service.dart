@@ -41,7 +41,7 @@ class OverpassService {
   static Future<List<Map<String, dynamic>>> fetchFitnessStations({
     required String areaName,
   }) async {
-    final cacheKey = 'fitness_${areaName}';
+    final cacheKey = 'fitness_$areaName';
     final cached = await _getCachedData(cacheKey);
     if (cached != null) return cached;
 
