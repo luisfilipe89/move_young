@@ -1,121 +1,260 @@
 import 'package:flutter/material.dart';
-import 'package:move_young/widgets/activity_card.dart';
-import 'package:move_young/screens/fields/football_field_screen.dart';
-import 'package:move_young/screens/fields/basketball_court_screen.dart';
-import 'package:move_young/screens/fields/fitness_station_screen.dart';
-import 'package:move_young/screens/fields/games_corner_screen.dart';
-import 'package:move_young/screens/fields/skate_bmx_screen.dart';
+import 'package:move_young/screens/menus/basketball_courts.dart';
+import 'package:move_young/screens/menus/fitness_outdoor.dart';
+import 'package:move_young/screens/menus/fitness_station.dart';
+import 'package:move_young/screens/menus/football_fields.dart';
+import 'package:move_young/screens/menus/games_corners.dart';
+import 'package:move_young/screens/menus/skate_bmx_parks.dart';
 
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFF5B2B),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFF5B2B),
-        elevation: 0,
-        title: const Text(
-          "LET’S GET MOVING,\nDEN BOSCH!",
-          style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int selectedCategoryIndex = 0;
+
+  final List<String> categories = ['Group Activities', 'Individual', 'Intensive'];
+
+  final Map<String, List<Map<String, String>>> activities = {
+    'Group Activities': [
+      {
+        'title': 'Football',
+        'image': 'assets/images/soccer.webp',
+        'calories': '430Kcal/hr',
+      },
+      {
+        'title': 'Basketball',
+        'image': 'assets/images/basketball5.webp',
+        'calories': '430Kcal/hr',
+      },
+      {
+        'title': 'Tennis',
+        'image': 'assets/images/tennis.webp',
+        'calories': '430Kcal/hr',
+      },
+    ],
+    'Individual': [
+      {
+        'title': 'Swimming',
+        'image': 'assets/images/swimming.webp',
+        'calories': '200Kcal/hr',
+      },
+      {
+        'title': 'Fitness Station',
+        'image': 'assets/images/fitness.webp',
+        'calories': '250Kcal/hr',
+      },
+    ],
+    'Intensive': [
+      {
+        'title': 'Crossfit',
+        'image': 'https://placehold.co/400x200?text=Crossfit',
+        'calories': '600Kcal/hr',
+      },
+      {
+        'title': 'Boxing',
+        'image': 'https://placehold.co/400x200?text=Boxing',
+        'calories': '700Kcal/hr',
+      },
+    ],
+  };
+
+  void navigateToMenu(String title) {
+    Widget? screen;
+
+    switch (title.toLowerCase()) {
+      case 'football':
+        screen = const FootballFieldScreen();
+        break;
+      case 'basketball':
+        screen = const BasketballCourtScreen();
+        break;
+      case 'fitness station':
+        screen = const FitnessStationScreen();
+        break;
+      case 'games corner':
+        screen = const GamesCornerScreen();
+        break;
+      default:
+        break;
+    }
+    if (screen != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => screen!),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No menu available for $title')),
+      );
+    }
+  }
+
+  
+  Widget flameWithText(String text) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text('🔥', style: TextStyle(fontSize: 14)),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 13,
+            color: Colors.black54,
+            fontWeight: FontWeight.w400,
+            fontFamily: 'Poppins',
+          ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
+      ],
+    );
+  }
+
+  Widget activityCard(String title, String imageUrl, String calories) {
+    return GestureDetector(
+      onTap: () => navigateToMenu(title),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ActivityCard(
-              title: "Urban Dance Class",
-              subtitle: "Near you",
-              buttonText: "JOIN",
-              icon: Icons.directions_run,
-              backgroundColor: Colors.deepPurple,
-              onPressed: () {},
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                imageUrl,
+                height: 160,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
             ),
-            ActivityCard(
-              title: "Bike Challenge with Friends",
-              subtitle: "Track miles ridden over a week",
-              buttonText: "LEARN MORE",
-              icon: Icons.pedal_bike,
-              backgroundColor: Colors.orange,
-              onPressed: () {},
-            ),
-            ActivityCard(
-              title: "Free Basketball Court",
-              subtitle: "Open Today",
-              buttonText: "JOIN",
-              icon: Icons.sports_basketball,
-              backgroundColor: Colors.teal,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const BasketballCourtScreen()),
-                  );},
-            ),
-            ActivityCard(
-              title: "Free Football Field",
-              subtitle: "Choose Field and Invite Friends",
-              buttonText: "JOIN",
-              icon: Icons.sports_soccer,
-              backgroundColor: Colors.green,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FootballFieldScreen()),
-                  );},
-            ),
-            ActivityCard(
-              title: "Fitness Outdoor Zone",
-              subtitle: "Train in the fresh air",
-              buttonText: "JOIN",
-              icon: Icons.fitness_center,
-              backgroundColor: Colors.indigo,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FitnessStationScreen()),
-                  );},
-            ),
-            ActivityCard(
-              title: "Park Games",
-              subtitle: "Fun activities in the park",
-              buttonText: "JOIN",
-              icon: Icons.park,
-              backgroundColor: Colors.purple,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const GamesCornerScreen()),
-                  );},
-            ),
-            ActivityCard(
-              title: "Skate & BMX Park",
-              subtitle: "Explore skateparks and BMX ramps",
-              buttonText: "JOIN",
-              icon: Icons.directions_bike,
-              backgroundColor: Colors.orangeAccent,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SkateBmxScreen()),
-                  );},
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                ),
+                flameWithText(calories),
+              ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedCategory = categories[selectedCategoryIndex];
+    final selectedActivities = activities[selectedCategory]!;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: ListView(
+            children: [
+              const SizedBox(height: 16),
+
+              // Top icons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Icon(Icons.arrow_back_ios_new, size: 24),
+                  Icon(Icons.menu, size: 28),
+                ],
+              ),
+
+              const SizedBox(height: 32),
+
+              // Title
+              const Text(
+                'Find your',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w300,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+              const Text(
+                'activity',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Category Tabs
+              Row(
+                children: List.generate(categories.length, (index) {
+                  final isSelected = index == selectedCategoryIndex;
+                  return GestureDetector(
+                    onTap: () => setState(() => selectedCategoryIndex = index),
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 24),
+                      child: Column(
+                        children: [
+                          Text(
+                            categories[index],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black.withOpacity(isSelected ? 1.0 : 0.5),
+                            ),
+                          ),
+                          if (isSelected)
+                            Container(
+                              margin: const EdgeInsets.only(top: 6),
+                              width: 20,
+                              height: 2,
+                              color: Colors.black,
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Cards
+              ...selectedActivities.map((a) => activityCard(
+                    a['title']!,
+                    a['image']!,
+                    a['calories']!,
+                  )),
+            ],
+          ),
+        ),
+      ),
+
+      // Bottom Navigation
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
         currentIndex: 0,
         selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        backgroundColor: const Color(0xFFFFEFD2),
+        unselectedItemColor: Colors.black45,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: "Progress"),
-          BottomNavigationBarItem(icon: Icon(Icons.flag), label: "Challenges"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: ''),
         ],
       ),
     );
