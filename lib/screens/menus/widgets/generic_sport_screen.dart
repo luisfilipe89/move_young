@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-
 import 'package:move_young/services/overpass_service.dart';
-import 'package:move_young/utils/reverse_geocoding.dart';
 import 'package:move_young/screens/maps/generic_map_screen.dart';
+import 'package:move_young/utils/reverse_geocoding.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:move_young/screens/mains/image_preview_screen.dart';
 
 class GenericSportScreen extends StatefulWidget {
@@ -50,7 +49,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
     try {
       await Geolocator.requestPermission();
       _userPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
       );
 
       final locations = await OverpassService.fetchFields(
@@ -153,7 +152,13 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
       appBar: AppBar(
         title: Text(widget.title),
         centerTitle: true,
-        backgroundColor: Colors.black87,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        elevation: 0,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -179,58 +184,54 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search by name or address...',
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Search by name or address...',
+                                filled: true,
+                                fillColor: Colors.grey[200],
+                                prefixIcon: const Icon(Icons.search),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _searchQuery = value;
+                                  _applyFilters();
+                                });
+                              },
+                            ),
                           ),
-                        ),
-                        onChanged: (value) {
-                          setState(() {
-                            _searchQuery = value;
-                            _applyFilters();
-                          });
-                        },
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => GenericMapScreen(
+                                    title: widget.title,
+                                    locations: _filteredLocations,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Row(
+                              children: const [
+                                Icon(Icons.map, color: Colors.black),
+                                SizedBox(width: 4),
+                                Text('Show in map', style: TextStyle(color: Colors.black)),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 24.0, top: 12.0, bottom: 8.0),
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => GenericMapScreen(
-                                title: widget.title,
-                                locations: _filteredLocations,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.map, color: Colors.black),
-                            SizedBox(width: 6),
-                            Text(
-                              'Show in map',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Poppins',
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    const SizedBox(height: 8),
                     Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.only(bottom: 80),
@@ -269,7 +270,8 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                                     width: 100,
                                     height: 70,
                                     color: Colors.grey[300],
-                                    child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                                    child:
+                                        const Icon(Icons.image_not_supported, color: Colors.grey),
                                   ),
                             title: FutureBuilder<String>(
                               future: _getDisplayName(field),

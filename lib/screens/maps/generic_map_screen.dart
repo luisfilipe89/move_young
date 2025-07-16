@@ -29,8 +29,12 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
 
   Future<void> _initializeMap() async {
     try {
+      final locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.high,
+      );
+
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: locationSettings,
       );
       setState(() {
         _userPosition = position;

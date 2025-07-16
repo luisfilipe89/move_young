@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:move_young/screens/menus/basketball_courts.dart';
 import 'package:move_young/screens/menus/football_fields.dart';
-import 'package:move_young/screens/menus/games_corners.dart';
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -69,9 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       case 'basketball':
         screen = const BasketballCourtsScreen();
-        break;
-      case 'games corner':
-        screen = const GamesCornerScreen();
         break;
       default:
         break;
