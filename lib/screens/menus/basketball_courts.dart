@@ -12,3 +12,16 @@ class BasketballCourtsScreen extends StatelessWidget {
     );
   }
 }
+
+class BasketballFieldDisplay {
+  static Map<String, (IconData icon, Color color)> tagIcons = {
+    'surface': (Icons.sports_basketball, Colors.orange),
+    'lit': (Icons.lightbulb_outline, Colors.amber),
+    'hoops': (Icons.sports, Colors.orange),
+  };
+
+  static String formatValue(String key, String? value) {
+    if (key == 'lit') return value == 'yes' ? 'Lit' : 'Unlit';
+    return value ?? 'Unknown';
+  }
+}

@@ -17,8 +17,9 @@ class OverpassService {
     [out:json][timeout:25];
     area["name"="$areaName"]->.searchArea;
     (
-      node["leisure"="pitch"]["sport"="$sportType"]["access"!="private"](area.searchArea);
-      way["leisure"="pitch"]["sport"="$sportType"]["access"!="private"](area.searchArea);
+      node["sport"="$sportType"]["access"!~"private|no"](area.searchArea);
+      way["sport"="$sportType"]["access"!~"private|no"](area.searchArea);
+      relation["sport"="$sportType"]["access"!~"private|no"](area.searchArea);
     );
     out center tags;
     """;
@@ -38,52 +39,6 @@ class OverpassService {
     return parsed;
   }
 
-  static Future<List<Map<String, dynamic>>> fetchFitnessStations({
-    required String areaName,
-  }) async {
-    final cacheKey = 'fitness_$areaName';
-    final cached = await _getCachedData(cacheKey);
-    if (cached != null) return cached;
-
-    final query = """
-    [out:json][timeout:25];
-    area["name"="$areaName"]->.searchArea;
-    (
-      node["leisure"="fitness_station"]["access"!="private"](area.searchArea);
-      way["leisure"="fitness_station"]["access"!="private"](area.searchArea);
-    );
-    out center tags;
-    """;
-
-    final response = await http.post(
-      Uri.parse('https://overpass-api.de/api/interpreter'),
-      headers: {"Content-Type": "application/x-www-form-urlencoded"},
-      body: {'data': query},
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Overpass API error: ${response.statusCode}');
-    }
-
-    final data = jsonDecode(response.body);
-    final elements = data['elements'] as List<dynamic>;
-
-    final parsed = elements.map<Map<String, dynamic>>((element) {
-      final tags = element['tags'] ?? {};
-      return {
-        'name': tags['name'] ?? 'Unnamed Station',
-        'lat': element['lat'] ?? element['center']?['lat'],
-        'lon': element['lon'] ?? element['center']?['lon'],
-        'equipment': tags['equipment'],
-        'outdoor': tags['outdoor'],
-        'tags': tags,
-      };
-    }).where((e) => e['lat'] != null && e['lon'] != null).toList();
-
-    await _cacheData(cacheKey, parsed);
-    return parsed;
-  }
-
   static Future<List<Map<String, dynamic>>> fetchMultipleFields({
     required String areaName,
     required List<String> sportTypes,
@@ -94,8 +49,9 @@ class OverpassService {
 
     final sportFilters = sportTypes.map((sport) {
       return '''
-      node["leisure"="pitch"]["sport"="$sport"]["access"!="private"](area.searchArea);
-      way["leisure"="pitch"]["sport"="$sport"]["access"!="private"](area.searchArea);
+      node["sport"="$sport"]["access"!~"private|no"](area.searchArea);
+      way["sport"="$sport"]["access"!~"private|no"](area.searchArea);
+      relation["sport"="$sport"]["access"!~"private|no"](area.searchArea);
       ''';
     }).join();
 

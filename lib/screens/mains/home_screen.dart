@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:move_young/screens/menus/basketball_courts.dart';
 import 'package:move_young/screens/menus/football_fields.dart';
+import 'package:move_young/screens/menus/fitness_stations.dart';
+import 'package:move_young/screens/menus/table_tennis.dart';
+import 'package:move_young/screens/menus/skateboarding.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int selectedCategoryIndex = 0;
 
-  final List<String> categories = ['Group Activities', 'Individual', 'Intensive'];
+  final List<String> categories = ['Group Activities', 'Individual', 'Radical'];
 
   final Map<String, List<Map<String, String>>> activities = {
     'Group Activities': [
@@ -31,6 +35,11 @@ class _HomeScreenState extends State<HomeScreen> {
         'image': 'assets/images/tennis.webp',
         'calories': '430Kcal/hr',
       },
+      {
+        'title': 'Table Tennis',
+        'image': 'assets/images/tennis.webp',
+        'calories': '430Kcal/hr',
+      },
     ],
     'Individual': [
       {
@@ -44,16 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
         'calories': '250Kcal/hr',
       },
     ],
-    'Intensive': [
+    'Radical': [
       {
-        'title': 'Crossfit',
+        'title': 'Skateboarding',
         'image': 'https://placehold.co/400x200?text=Crossfit',
         'calories': '600Kcal/hr',
-      },
-      {
-        'title': 'Boxing',
-        'image': 'https://placehold.co/400x200?text=Boxing',
-        'calories': '700Kcal/hr',
       },
     ],
   };
@@ -68,6 +72,14 @@ class _HomeScreenState extends State<HomeScreen> {
       case 'basketball':
         screen = const BasketballCourtsScreen();
         break;
+      case 'fitness station':
+        screen = const FitnessStationsScreen();
+        break;
+      case 'table tennis':
+        screen = const TableTennisScreen();
+        break;
+      case 'skateboarding':
+        screen = const SkateboardingScreen();
       default:
         break;
     }
