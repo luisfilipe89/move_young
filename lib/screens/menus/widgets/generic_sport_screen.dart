@@ -3,10 +3,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:move_young/services/overpass_service.dart';
-import 'package:move_young/screens/maps/generic_map_screen.dart';
+import 'package:move_young/screens/maps/gmaps_screen.dart';
 import 'package:move_young/utils/reverse_geocoding.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:move_young/screens/mains/image_preview_screen.dart';
+import 'package:move_young/config/sport_characteristics.dart'; // ✅ NEW IMPORT
 
 class GenericSportScreen extends StatefulWidget {
   final String title;
@@ -146,6 +147,76 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
     return streetName;
   }
 
+  // ✅ ADDING CHARACTERISTICS ROW
+Widget _buildCharacteristicsRow(Map<String, dynamic> field) {
+  final tags = field['tags'] ?? {};
+  final keys = SportCharacteristics.get(widget.sportType);
+
+  final List<Widget> characteristics = [];
+
+  for (var key in keys) {
+    dynamic value = tags[key];
+
+    // Default handling
+    if (key == 'surface' && (value == null || value.toString().isEmpty)) {
+      value = 'Unknown';
+    }
+
+    // Skip if value is missing (except surface)
+    if (value == null || value.toString().isEmpty) continue;
+
+    IconData? icon;
+    Color iconColor = Colors.black87;
+
+    switch (key) {
+      case 'surface':
+        icon = Icons.sports_soccer;
+        iconColor = Colors.green;
+        break;
+      case 'lit':
+        icon = Icons.lightbulb_outline;
+        iconColor = value == 'yes' ? Colors.amber : Colors.grey;
+        value = value == 'yes' ? 'Lit' : 'Unlit';
+        break;
+      case 'basket':
+        icon = Icons.sports_basketball;
+        iconColor = Colors.orange;
+        break;
+      case 'equipment':
+        icon = Icons.fitness_center;
+        iconColor = Colors.blueGrey;
+        break;
+      case 'covered':
+        icon = Icons.roofing;
+        iconColor = Colors.teal;
+        break;
+      default:
+        icon = Icons.info_outline;
+        iconColor = Colors.grey;
+    }
+
+    characteristics.add(Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: iconColor),
+        const SizedBox(width: 4),
+        Text(
+          value.toString(),
+          style: const TextStyle(fontSize: 14, color: Colors.black87),
+        ),
+        const SizedBox(width: 12),
+      ],
+    ));
+  }
+
+  return Padding(
+    padding: const EdgeInsets.only(top: 4),
+    child: Row(children: characteristics),
+  );
+}
+
+
+///////////////
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -250,8 +321,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) =>
-                                              ImagePreviewScreen(imageUrl: imageUrl),
+                                          builder: (_) => ImagePreviewScreen(imageUrl: imageUrl),
                                         ),
                                       );
                                     },
@@ -279,7 +349,14 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                                 return Text(snapshot.data ?? 'Unnamed Location');
                               },
                             ),
-                            subtitle: Text(_formatDistance(distance)),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(_formatDistance(distance)),
+                                const SizedBox(height: 4),
+                                _buildCharacteristicsRow(field), // ✅ NEW
+                              ],
+                            ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
