@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/principals/home_screen.dart';
+import 'screens/mains/home_screen.dart';
 
 void main() {
   runApp(const MoveYoungApp());

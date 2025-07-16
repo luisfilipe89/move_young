@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:move_young/screens/menus/basketball_courts.dart';
-import 'package:move_young/screens/menus/fitness_outdoor.dart';
-import 'package:move_young/screens/menus/fitness_station.dart';
 import 'package:move_young/screens/menus/football_fields.dart';
 import 'package:move_young/screens/menus/games_corners.dart';
-import 'package:move_young/screens/menus/skate_bmx_parks.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -70,10 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
         screen = const FootballFieldScreen();
         break;
       case 'basketball':
-        screen = const BasketballCourtScreen();
-        break;
-      case 'fitness station':
-        screen = const FitnessStationScreen();
+        screen = const BasketballCourtsScreen();
         break;
       case 'games corner':
         screen = const GamesCornerScreen();
@@ -212,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               fontSize: 16,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              color: Colors.black.withOpacity(isSelected ? 1.0 : 0.5),
+                              color: Colors.black.withAlpha((0.6*255).round())
                             ),
                           ),
                           if (isSelected)
