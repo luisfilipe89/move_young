@@ -7,9 +7,8 @@ import 'package:move_young/screens/maps/gmaps_screen.dart';
 import 'package:move_young/utils/reverse_geocoding.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:move_young/screens/mains/image_preview_screen.dart';
-import 'package:move_young/config/sport_characteristics.dart'; // ✅ NEW IMPORT
-import 'package:move_young/config/sport_display_registry.dart'; // new import
-
+import 'package:move_young/config/sport_characteristics.dart';
+import 'package:move_young/config/sport_display_registry.dart';
 
 class GenericSportScreen extends StatefulWidget {
   final String title;
@@ -35,6 +34,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   final Map<String, String> _locationCache = {};
+  final Set<String> _activeFilters = {}; // ✅ characteristic filter state
 
   @override
   void initState() {
@@ -90,6 +90,15 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
           !name.contains(_searchQuery.toLowerCase()) &&
           !address.contains(_searchQuery.toLowerCase())) {
         return false;
+      }
+
+      if (_activeFilters.isNotEmpty) {
+        final tags = field['tags'] ?? {};
+        for (var filter in _activeFilters) {
+          if (!(tags.containsKey(filter) && tags[filter] != null && tags[filter] != 'no')) {
+            return false;
+          }
+        }
       }
 
       return true;
@@ -149,42 +158,67 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
     return streetName;
   }
 
-  // ✅ ADDING CHARACTERISTICS ROW
+  Widget _buildCharacteristicsRow(Map<String, dynamic> field) {
+    final tags = field['tags'] ?? {};
+    final keys = SportCharacteristics.get(widget.sportType);
+    final iconMap = SportDisplayRegistry.getIconMap(widget.sportType);
+    final formatValue = SportDisplayRegistry.getFormatter(widget.sportType);
 
-Widget _buildCharacteristicsRow(Map<String, dynamic> field) {
-  final tags = field['tags'] ?? {};
-  final keys = SportCharacteristics.get(widget.sportType);
-  final iconMap = SportDisplayRegistry.getIconMap(widget.sportType);
-  final formatValue = SportDisplayRegistry.getFormatter(widget.sportType);
+    final List<Widget> characteristics = [];
 
-  final List<Widget> characteristics = [];
+    for (var key in keys) {
+      final rawValue = tags[key];
+      final value = formatValue(key, rawValue);
+      final iconData = iconMap[key]?.$1 ?? Icons.info_outline;
+      final color = iconMap[key]?.$2 ?? Colors.grey;
 
-  for (var key in keys) {
-    final rawValue = tags[key];
-    final value = formatValue(key, rawValue);
+      characteristics.add(Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(iconData, size: 16, color: color),
+          const SizedBox(width: 4),
+          Text(value, style: const TextStyle(fontSize: 14, color: Colors.black87)),
+          const SizedBox(width: 12),
+        ],
+      ));
+    }
 
-    final iconData = iconMap[key]?.$1 ?? Icons.info_outline;
-    final color = iconMap[key]?.$2 ?? Colors.grey;
-
-    characteristics.add(Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(iconData, size: 16, color: color),
-        const SizedBox(width: 4),
-        Text(value, style: const TextStyle(fontSize: 14, color: Colors.black87)),
-        const SizedBox(width: 12),
-      ],
-    ));
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(children: characteristics),
+    );
   }
 
-  return Padding(
-    padding: const EdgeInsets.only(top: 4),
-    child: Row(children: characteristics),
-  );
-}
+  Widget _buildFilterChips() {
+    final keys = SportCharacteristics.get(widget.sportType);
 
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: keys.map((key) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: FilterChip(
+              label: Text(key[0].toUpperCase() + key.substring(1)),
+              selected: _activeFilters.contains(key),
+              onSelected: (selected) {
+                setState(() {
+                  if (selected) {
+                    _activeFilters.add(key);
+                  } else {
+                    _activeFilters.remove(key);
+                  }
+                  _applyFilters();
+                });
+              },
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 
-///////////////
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -217,8 +251,6 @@ Widget _buildCharacteristicsRow(Map<String, dynamic> field) {
                           color: Colors.black,
                           height: 1.4,
                         ),
-                        textAlign: TextAlign.left,
-                        softWrap: true,
                       ),
                     ),
                     Padding(
@@ -271,6 +303,8 @@ Widget _buildCharacteristicsRow(Map<String, dynamic> field) {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    _buildFilterChips(), // ✅ Characteristics Filter Chips
+                    const SizedBox(height: 8),
                     Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.only(bottom: 80),
@@ -322,7 +356,7 @@ Widget _buildCharacteristicsRow(Map<String, dynamic> field) {
                               children: [
                                 Text(_formatDistance(distance)),
                                 const SizedBox(height: 4),
-                                _buildCharacteristicsRow(field), // ✅ NEW
+                                _buildCharacteristicsRow(field),
                               ],
                             ),
                             trailing: Row(
