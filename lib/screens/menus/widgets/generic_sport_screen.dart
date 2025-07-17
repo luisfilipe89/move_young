@@ -10,6 +10,8 @@ import 'package:move_young/screens/mains/image_preview_screen.dart';
 import 'package:move_young/config/sport_characteristics.dart';
 import 'package:move_young/config/sport_display_registry.dart';
 import 'package:move_young/services/cache_service.dart';
+import 'package:move_young/services/favorites_service.dart';
+
 
 class GenericSportScreen extends StatefulWidget {
   final String title;
@@ -26,6 +28,7 @@ class GenericSportScreen extends StatefulWidget {
 }
 
 class _GenericSportScreenState extends State<GenericSportScreen> {
+  Set<String> _favoriteIds = {}; // ✅ Favorite locations
   List<Map<String, dynamic>> _allLocations = [];
   List<Map<String, dynamic>> _filteredLocations = [];
   bool _isLoading = true;
@@ -40,7 +43,15 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
   @override
   void initState() {
     super.initState();
+    _loadFavorites();
     _loadData();
+  }
+
+  Future<void> _loadFavorites() async {
+    final favs = await FavoritesService.getFavorites();
+    setState(() {
+      _favoriteIds = favs;
+    });
   }
 
   @override
@@ -391,6 +402,30 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // ✅ Favorite Button with Animation
+                               AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+                                child: IconButton(
+                                  key: ValueKey<bool>(_favoriteIds.contains('$lat,$lon')),
+                                  icon: Icon(
+                                    _favoriteIds.contains('$lat,$lon') ? Icons.favorite: Icons.favorite_border,
+                                    color: _favoriteIds.contains('$lat,$lon') ? Colors.red: null,
+                                  ),
+                                  onPressed: () async {
+                                    final id = '$lat,$lon';
+                                    await FavoritesService.toggleFavorite(id);
+                                    setState(() {
+                                      if (_favoriteIds.contains(id)) {
+                                        _favoriteIds.remove(id);
+                                      } else {
+                                        _favoriteIds.add(id);
+                                      }
+                                    });
+                                  },
+                                ),
+                               ),
+
                                 IconButton(
                                   icon: const Icon(Icons.share),
                                   onPressed: () async {
