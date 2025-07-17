@@ -7,6 +7,12 @@
       "type": "dart",
       "deviceId": "RF8N31RNCLX",
       "flutterMode": "debug",
-    }
+    },
+    {
+      "name": "Flutter: Launch Chrome",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome"
+    }    
   ]
 }

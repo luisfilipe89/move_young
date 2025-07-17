@@ -116,6 +116,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget activityCard(String title, String imageUrl, String calories) {
+    final isNetworkImage = imageUrl.startsWith('http');
+    
+
     return GestureDetector(
       onTap: () => navigateToMenu(title),
       child: Padding(
@@ -125,12 +128,19 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Image.network(
-                imageUrl,
-                height: 160,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: isNetworkImage
+                  ? Image.network(
+                      imageUrl,
+                      height: 160,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                    imageUrl,
+                    height: 160,
+                    width: double.infinity,
+                    fit: BoxFit.cover,  
+                   ),
             ),
             const SizedBox(height: 8),
             Row(
