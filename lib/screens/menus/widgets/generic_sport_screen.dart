@@ -225,7 +225,13 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
 
     return Padding(
       padding: const EdgeInsets.only(top: 4),
-      child: Row(children: characteristics),
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 4,
+        children: characteristics.isNotEmpty
+            ? characteristics
+            : [Text('No characteristics available', style: TextStyle(color: Colors.grey[600]))],
+      ),
     );
   }
 
@@ -262,6 +268,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(widget.title),
         centerTitle: true,
@@ -277,11 +284,11 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
           ? const Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(child: Text(_error!))
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              : ListView(
+                  padding: const EdgeInsets.only(bottom: 80),
                   children: [
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       child: Text(
                         'Find location for your exercise',
                         style: TextStyle(
@@ -343,106 +350,99 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    _buildFilterChips(), // ✅ Characteristics Filter Chips
+                    _buildFilterChips(),
                     const SizedBox(height: 8),
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.only(bottom: 80),
-                        itemCount: _filteredLocations.length,
-                        itemBuilder: (context, index) {
-                          final field = _filteredLocations[index];
-                          final lat = field['lat'].toString();
-                          final lon = field['lon'].toString();
-                          final distance = field['distance'] as double;
-                          final imageUrl = field['tags']?['image'];
+                    ..._filteredLocations.map((field) {
+                      final lat = field['lat'].toString();
+                      final lon = field['lon'].toString();
+                      final distance = field['distance'] as double;
+                      final imageUrl = field['tags']?['image'];
 
-                          return ListTile(
-                            leading: imageUrl != null
-                                ? GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => ImagePreviewScreen(imageUrl: imageUrl),
-                                        ),
-                                      );
-                                    },
-                                    child: CachedNetworkImage(
-                                      imageUrl: imageUrl,
-                                      width: 100,
-                                      height: 70,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) =>
-                                          const Center(child: CircularProgressIndicator()),
-                                      errorWidget: (context, url, error) =>
-                                          const Icon(Icons.broken_image),
+                      return ListTile(
+                        leading: imageUrl != null
+                            ? GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ImagePreviewScreen(imageUrl: imageUrl),
                                     ),
-                                  )
-                                : Container(
-                                    width: 100,
-                                    height: 70,
-                                    color: Colors.grey[300],
-                                    child:
-                                        const Icon(Icons.image_not_supported, color: Colors.grey),
-                                  ),
-                            title: FutureBuilder<String>(
-                              future: _getDisplayName(field),
-                              builder: (context, snapshot) {
-                                return Text(snapshot.data ?? 'Unnamed Location');
+                                  );
+                                },
+                                child: CachedNetworkImage(
+                                  imageUrl: imageUrl,
+                                  width: 100,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) =>
+                                      const Center(child: CircularProgressIndicator()),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.broken_image),
+                                ),
+                              )
+                            : Container(
+                                width: 100,
+                                height: 70,
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                              ),
+                        title: FutureBuilder<String>(
+                          future: _getDisplayName(field),
+                          builder: (context, snapshot) {
+                            return Text(snapshot.data ?? 'Unnamed Location');
+                          },
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(_formatDistance(distance)),
+                            const SizedBox(height: 4),
+                            _buildCharacteristicsRow(field),
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              transitionBuilder: (child, animation) =>
+                                  ScaleTransition(scale: animation, child: child),
+                              child: IconButton(
+                                key: ValueKey<bool>(_favoriteIds.contains('$lat,$lon')),
+                                icon: Icon(
+                                  _favoriteIds.contains('$lat,$lon')
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: _favoriteIds.contains('$lat,$lon') ? Colors.red : null,
+                                ),
+                                onPressed: () async {
+                                  final id = '$lat,$lon';
+                                  await FavoritesService.toggleFavorite(id);
+                                  setState(() {
+                                    if (_favoriteIds.contains(id)) {
+                                      _favoriteIds.remove(id);
+                                    } else {
+                                      _favoriteIds.add(id);
+                                    }
+                                  });
+                                },
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.share),
+                              onPressed: () async {
+                                final name = await _getDisplayName(field);
+                                _shareLocation(name, lat, lon);
                               },
                             ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(_formatDistance(distance)),
-                                const SizedBox(height: 4),
-                                _buildCharacteristicsRow(field),
-                              ],
+                            IconButton(
+                              icon: const Icon(Icons.directions),
+                              onPressed: () => _openDirections(lat, lon),
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // ✅ Favorite Button with Animation
-                               AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 300),
-                                transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
-                                child: IconButton(
-                                  key: ValueKey<bool>(_favoriteIds.contains('$lat,$lon')),
-                                  icon: Icon(
-                                    _favoriteIds.contains('$lat,$lon') ? Icons.favorite: Icons.favorite_border,
-                                    color: _favoriteIds.contains('$lat,$lon') ? Colors.red: null,
-                                  ),
-                                  onPressed: () async {
-                                    final id = '$lat,$lon';
-                                    await FavoritesService.toggleFavorite(id);
-                                    setState(() {
-                                      if (_favoriteIds.contains(id)) {
-                                        _favoriteIds.remove(id);
-                                      } else {
-                                        _favoriteIds.add(id);
-                                      }
-                                    });
-                                  },
-                                ),
-                               ),
-
-                                IconButton(
-                                  icon: const Icon(Icons.share),
-                                  onPressed: () async {
-                                    final name = await _getDisplayName(field);
-                                    _shareLocation(name, lat, lon);
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.directions),
-                                  onPressed: () => _openDirections(lat, lon),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ],
                 ),
     );
