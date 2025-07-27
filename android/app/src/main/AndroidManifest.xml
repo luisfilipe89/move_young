@@ -8,6 +8,14 @@
         android:label="move_young"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false"/>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCKTVN_ZX07XJEZvxDQ4ZOLGJYWLPNuh5A" />
         
         <activity
             android:name=".MainActivity"
@@ -25,6 +33,7 @@
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
+
               />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -37,6 +46,7 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.

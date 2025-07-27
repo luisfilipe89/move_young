@@ -16,10 +16,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int selectedCategoryIndex = 0;
 
-  final List<String> categories = ['Group Activities', 'Individual', 'Radical'];
+  final List<String> categories = ['Grouped', 'Not so Grouped', 'Radical'];
 
   final Map<String, List<Map<String, String>>> activities = {
-    'Group Activities': [
+    'Grouped': [
       {
         'title': 'Football',
         'image': 'assets/images/soccer.webp',
@@ -27,12 +27,12 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       {
         'title': 'Basketball',
-        'image': 'assets/images/basketball5.webp',
+        'image': 'assets/images/basketball.jpg',
         'calories': '430Kcal/hr',
       },
       {
         'title': 'Tennis',
-        'image': 'assets/images/tennis.webp',
+        'image': 'assets/images/tennis.jpg',
         'calories': '430Kcal/hr',
       },
       {
@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'calories': '430Kcal/hr',
       },
     ],
-    'Individual': [
+    'Not so Grouped': [
       {
         'title': 'Swimming',
         'image': 'assets/images/swimming.webp',
@@ -49,14 +49,14 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       {
         'title': 'Fitness Station',
-        'image': 'assets/images/fitness.webp',
+        'image': 'assets/images/fitness_station.jpg',
         'calories': '250Kcal/hr',
       },
     ],
     'Radical': [
       {
         'title': 'Skateboarding',
-        'image': 'https://placehold.co/400x200?text=Crossfit',
+        'image': 'assets/images/skateboarding.webp',
         'calories': '600Kcal/hr',
       },
     ],
@@ -137,6 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                   : Image.asset(
                     imageUrl,
+                    alignment: Alignment(0.0,-0.2),
                     height: 160,
                     width: double.infinity,
                     fit: BoxFit.cover,  

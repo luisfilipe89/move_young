@@ -9,7 +9,7 @@ class FootballFieldScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const GenericSportScreen(
       title: 'Football Fields',
-      sportType: 'soccer', // must match registry key
+      sportType: 'soccer', 
     );
   }
 }

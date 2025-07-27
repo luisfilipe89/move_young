@@ -396,6 +396,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(_formatDistance(distance)),
+                            Text('$lat,$lon', style: const TextStyle(fontSize: 12, color: Colors.grey)),
                             const SizedBox(height: 4),
                             _buildCharacteristicsRow(field),
                           ],
