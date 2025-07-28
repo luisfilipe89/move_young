@@ -96,7 +96,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
           } else {
             final streetName = await getNearestStreetName(lat,lon);
             _locationCache[key] = streetName;
-            loc['ldisplayName'] = streetName;
+            loc['displayName'] = streetName;
           }
         }
       }
@@ -215,7 +215,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
         children: [
           Icon(iconData, size: 16, color: color),
           const SizedBox(width: 4),
-          Text(value, style: const TextStyle(fontSize: 14, color: Colors.black87)),
+          Text(value, style: const TextStyle(fontSize: 16, color: Colors.black87)),
           const SizedBox(width: 12),
         ],
       ));
@@ -262,6 +262,20 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
       ),
     );
   }
+
+  Widget _buildActionIcon({
+  required IconData icon,
+  required VoidCallback onPressed,
+  Color color = Colors.black,
+  String? tooltip,
+}) {
+  return IconButton(
+    icon: Icon(icon, size: 24, color: color),
+    tooltip: tooltip,
+    splashRadius: 24,
+    onPressed: onPressed,
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -351,94 +365,127 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                     _buildFilterChips(),
                     const SizedBox(height: 8),
                     ..._filteredLocations.map((field) {
-                      final lat = field['lat'].toString();
-                      final lon = field['lon'].toString();
-                      final distance = field['distance'] as double;
-                      final imageUrl = field['tags']?['image'];
+                    final lat = field['lat'].toString();
+                    final lon = field['lon'].toString();
+                    final distance = field['distance'] as double;
+                    final imageUrl = field['tags']?['image'];
 
-                      return ListTile(
-                        leading: imageUrl != null
-                            ? GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => ImagePreviewScreen(imageUrl: imageUrl),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              //Image
+                              if (imageUrl != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    height: 140,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    placeholder: (_, __) => const SizedBox(
+                                      height: 140,
+                                      child: Center(child: CircularProgressIndicator()),
                                     ),
-                                  );
-                                },
-                                child: CachedNetworkImage(
-                                  imageUrl: imageUrl,
-                                  width: 100,
-                                  height: 60,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) =>
-                                      const Center(child: CircularProgressIndicator()),
-                                  errorWidget: (context, url, error) =>
-                                      const Icon(Icons.broken_image),
+                                    errorWidget: (_, __, ___) => Container(
+                                      height: 140,
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.broken_image),
+                                    ),
+                                  ),
+                                )
+                              else  
+                                Container(
+                                  height: 140,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Center(child: Icon(Icons.image_not_supported)),
                                 ),
-                              )
-                            : Container(
-                                width: 100,
-                                height: 70,
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.image_not_supported, color: Colors.grey),
-                              ),
-                        title: Text(field['displayName'] ?? 'Unnamed Location'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(_formatDistance(distance)),
-                            Text('$lat,$lon', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                            const SizedBox(height: 4),
-                            _buildCharacteristicsRow(field),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              transitionBuilder: (child, animation) =>
-                                  ScaleTransition(scale: animation, child: child),
-                              child: IconButton(
-                                key: ValueKey<bool>(_favoriteIds.contains('$lat,$lon')),
-                                icon: Icon(
-                                  _favoriteIds.contains('$lat,$lon')
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  color: _favoriteIds.contains('$lat,$lon') ? Colors.red : null,
-                                ),
-                                onPressed: () async {
-                                  final id = '$lat,$lon';
-                                  await FavoritesService.toggleFavorite(id);
-                                  setState(() {
-                                    if (_favoriteIds.contains(id)) {
-                                      _favoriteIds.remove(id);
-                                    } else {
-                                      _favoriteIds.add(id);
-                                    }
-                                  });
-                                },
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.share),
-                              onPressed: () async {
-                                final name = await _getDisplayName(field);
-                                _shareLocation(name, lat, lon);
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.directions),
-                              onPressed: () => _openDirections(lat, lon),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ],
+                                        const SizedBox(height: 16),
+          FutureBuilder<String>(
+            future: _getDisplayName(field),
+            builder: (context, snapshot) {
+              return Text(
+                snapshot.data ?? 'Unnamed Field',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
                 ),
+              );
+            },
+          ),
+          const SizedBox(height: 4),
+
+          //Distance
+          Text(
+            _formatDistance(distance),
+            style: const TextStyle(color: Colors.black54),
+          ),
+          const SizedBox(height: 8),
+
+          //Build Characteristics          
+          _buildCharacteristicsRow(field),
+          const SizedBox(height: 16),
+
+          //Action Buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildActionIcon(
+                icon: _favoriteIds.contains('$lat,$lon') ? Icons.favorite : Icons.favorite_border,
+                color: _favoriteIds.contains('$lat,$lon') ? Colors.red : Colors.black,
+                tooltip: 'Favorite',
+                onPressed: () async {
+                  final id = '$lat,$lon';
+                  await FavoritesService.toggleFavorite(id);
+                  setState(() {
+                    _favoriteIds.contains(id)
+                        ? _favoriteIds.remove(id)
+                        : _favoriteIds.add(id);
+                  });
+                },
+              ),
+              _buildActionIcon(
+                icon: Icons.share,
+                tooltip: 'Share Location',
+                onPressed: () async {
+                  final name = await _getDisplayName(field);
+                  _shareLocation(name, lat, lon);
+                },
+              ),
+              _buildActionIcon(
+                icon: Icons.directions,
+                tooltip: 'Directions',
+                onPressed: () => _openDirections(lat, lon),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  ),
+);
+                  }).toList(),
+                ],
+              ),
     );
   }
 }
