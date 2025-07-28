@@ -9,7 +9,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:move_young/screens/mains/image_preview_screen.dart';
 import 'package:move_young/config/sport_characteristics.dart';
 import 'package:move_young/config/sport_display_registry.dart';
-import 'package:move_young/services/cache_service.dart';
 import 'package:move_young/services/favorites_service.dart';
 
 
@@ -62,34 +61,19 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
 
   Future<void> _loadData() async {
     try {
-      await Geolocator.requestPermission();
+      LocationPermission permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+        setState((){
+          _error = 'Location permission is required to show nearby fields.';
+          _isLoading = false;
+        });
+        return;
+      }
+      
       _userPosition = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
       );
 
-      final cacheKey = widget.sportType;
-
-      final cachedData = await CacheService.load(cacheKey);
-      if (cachedData != null && cachedData.isNotEmpty) {
-        for (var loc in cachedData) {
-          final lat = loc['lat'];
-          final lon = loc['lon'];
-          loc['distance'] = _calculateDistance(lat, lon);
-        }
-
-        cachedData.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
-
-        setState(() {
-          _allLocations = cachedData;
-          _filteredLocations = List.from(_allLocations);
-          _isLoading = false;
-        });
-
-        debugPrint('Loaded ${cachedData.length} items from cache');
-        return;
-      }
-      
-      // 🌐 If no cache, fetch from Overpass
       final locations = await OverpassService.fetchFields(
         areaName: "'s-Hertogenbosch",
         sportType: widget.sportType,
@@ -108,16 +92,13 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
         _applyFilters();
         _isLoading = false;
       });
-
-      // 💾 Save to cache
-      await CacheService.save(cacheKey, locations);
-      debugPrint('Cached ${locations.length} items for $cacheKey');
     
     } catch (e) {
       setState(() {
-        _error = 'Failed to load data: $e';
+        _error = 'Something went wrong while loading data';
         _isLoading = false;
       });
+      debugPrint('Error in _loadData: $e');
     }
   }
 
@@ -175,6 +156,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
   }
 
   String _formatDistance(double distance) {
+    if (distance == double.infinity) return 'Distance unknown';
     return distance < 1000
         ? '${distance.toStringAsFixed(0)} m away'
         : '${(distance / 1000).toStringAsFixed(1)} km away';

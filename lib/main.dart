@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:move_young/screens/mains/home_screen_new.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MoveYoungApp());
 }
 
@@ -10,10 +11,14 @@ class MoveYoungApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('🚀 MoveYoungApp is running');
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const HomeScreenNew(),
+      title: 'MoveYoung',
+      theme: ThemeData(
+        fontFamily: 'Poppins',
+        scaffoldBackgroundColor: Colors.white,
+      ),
+      home: const HomeScreenNew(), // ← ensure this is your real entry screen
     );
   }
 }

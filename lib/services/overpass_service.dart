@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OverpassService {
-  static const _cacheDuration = Duration(hours: 6);
+  static const _cacheDuration = Duration(days: 90);
 
   static Future<List<Map<String, dynamic>>> fetchFields({
     required String areaName,

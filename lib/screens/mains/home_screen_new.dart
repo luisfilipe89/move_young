@@ -92,7 +92,7 @@ class HomeScreenNew extends StatelessWidget {
                             topRight: Radius.circular(16),
                           ),
                           child: Image.asset(
-                            'assets/images/general_sports.jpg',
+                            'assets/images/general_public.jpg',
                             height: 100,
                             width: double.infinity,
                             fit: BoxFit.cover,
