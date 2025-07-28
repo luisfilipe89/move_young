@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/mains/home_screen.dart';
+import 'package:move_young/screens/mains/home_screen_new.dart';
 
 void main() {
   runApp(const MoveYoungApp());
@@ -10,14 +10,10 @@ class MoveYoungApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('🚀 MoveYoungApp is running');
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'MoveYoung',
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        fontFamily: 'Poppins',
-      ),
-      home: const HomeScreen(),
+      home: const HomeScreenNew(),
     );
   }
 }
