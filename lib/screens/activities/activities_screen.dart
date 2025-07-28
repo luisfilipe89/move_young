@@ -1,11 +1,11 @@
 
 import 'package:flutter/material.dart';
-import 'package:move_young/screens/menus/basketball_courts.dart';
-import 'package:move_young/screens/menus/football_fields.dart';
-import 'package:move_young/screens/menus/fitness_stations.dart';
-import 'package:move_young/screens/menus/table_tennis.dart';
-import 'package:move_young/screens/menus/skateboarding.dart';
-import 'package:move_young/screens/menus/widgets/custom_bottom_nav_bar.dart';
+import 'package:move_young/screens/activities/sport_types/basketball_courts.dart';
+import 'package:move_young/screens/activities/sport_types/football_fields.dart';
+import 'package:move_young/screens/activities/sport_types/fitness_stations.dart';
+import 'package:move_young/screens/activities/sport_types/table_tennis.dart';
+import 'package:move_young/screens/activities/sport_types/skateboarding.dart';
+import 'package:move_young/widgets/custom_bottom_nav_bar.dart';
 
 class ActivitiesScreen extends StatefulWidget {
   const ActivitiesScreen({super.key});

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:move_young/screens/mains/activities_screen.dart';
-import 'package:move_young/screens/menus/widgets/custom_bottom_nav_bar.dart';
+import 'package:move_young/screens/activities/activities_screen.dart';
+import 'package:move_young/widgets/custom_bottom_nav_bar.dart';
 
 class HomeScreenNew extends StatelessWidget {
   const HomeScreenNew({super.key});
 
   @override
   Widget build(BuildContext context) {
-    print('HOME SCREEN IS BEING LODADED');
     return Scaffold(
       backgroundColor: const Color(0xFFF3F3F3), // Light grey background
       appBar: AppBar(

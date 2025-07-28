@@ -6,7 +6,7 @@ import 'package:move_young/services/overpass_service.dart';
 import 'package:move_young/screens/maps/gmaps_screen.dart';
 import 'package:move_young/utils/reverse_geocoding.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:move_young/screens/mains/image_preview_screen.dart';
+import 'package:move_young/screens/activities/image_preview_screen.dart';
 import 'package:move_young/config/sport_characteristics.dart';
 import 'package:move_young/config/sport_display_registry.dart';
 import 'package:move_young/services/favorites_service.dart';
@@ -82,7 +82,23 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
       for (var loc in locations) {
         final lat = loc['lat'];
         final lon = loc['lon'];
-        loc['distance'] = _calculateDistance(lat, lon);
+
+        final distance = _calculateDistance(lat,lon);
+        loc['distance'] = distance.isFinite ? distance: double.infinity;
+
+        //Distance calc
+        if (loc['name'] != null && loc['name'].toString().trim().isNotEmpty) {
+          loc['displayName'] = loc['name'];
+        } else {
+          final key = '$lat,$lon';
+          if (_locationCache.containsKey(key)) {
+            loc['displayName'] = _locationCache[key];
+          } else {
+            final streetName = await getNearestStreetName(lat,lon);
+            _locationCache[key] = streetName;
+            loc['ldisplayName'] = streetName;
+          }
+        }
       }
 
       locations.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
@@ -368,12 +384,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                                 color: Colors.grey[300],
                                 child: const Icon(Icons.image_not_supported, color: Colors.grey),
                               ),
-                        title: FutureBuilder<String>(
-                          future: _getDisplayName(field),
-                          builder: (context, snapshot) {
-                            return Text(snapshot.data ?? 'Unnamed Location');
-                          },
-                        ),
+                        title: Text(field['displayName'] ?? 'Unnamed Location'),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

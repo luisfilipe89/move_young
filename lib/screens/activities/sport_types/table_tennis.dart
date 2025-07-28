@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:move_young/screens/menus/widgets/generic_sport_screen.dart';
+import 'package:move_young/screens/activities/sport_types/generic_sport_screen.dart';
 
 class TableTennisScreen extends StatelessWidget {
   const TableTennisScreen({super.key});

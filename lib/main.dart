@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:move_young/screens/mains/home_screen_new.dart';
+import 'package:move_young/screens/home/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

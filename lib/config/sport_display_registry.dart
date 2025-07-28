@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:move_young/screens/menus/football_fields.dart';
-import 'package:move_young/screens/menus/basketball_courts.dart';
-import 'package:move_young/screens/menus/table_tennis.dart';
+import 'package:move_young/screens/activities/sport_types/football_fields.dart';
+import 'package:move_young/screens/activities/sport_types/basketball_courts.dart';
+import 'package:move_young/screens/activities/sport_types/table_tennis.dart';
 
 
 typedef TagIconConfig = Map<String, (IconData, Color)>;
