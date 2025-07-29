@@ -3,10 +3,18 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NavigationUtils {
-  static void shareLocation(String name, String lat, String lon) {
+  static Future<void> shareLocation(String name, String lat, String lon) async{
     final message = "Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lon";
-    Share.share(message);
-  }
+    final result = await SharePlus.instance.share(
+      ShareParams(text:message),
+    );
+
+    if (result.status == ShareResultStatus.success) {
+      debugPrint("User successfully shared the location");
+    } else {
+      debugPrint("User dismissed or canceled sharing");
+   }
+  } 
 
   static Future<void> openDirections(BuildContext context, String lat, String lon) async {
     final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';

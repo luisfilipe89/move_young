@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:move_young/screens/activities/activities_screen.dart';
 import 'package:move_young/widgets/custom_bottom_nav_bar.dart';
+import 'package:move_young/data/mock_events.dart';
+
 
 class HomeScreenNew extends StatelessWidget {
   const HomeScreenNew({super.key});
@@ -126,6 +128,65 @@ class HomeScreenNew extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height:20),
+                // Upcoming Events Tile
+                const SizedBox(height: 20),
+
+                // Upcoming Events Tile
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color(0x33000000),
+                        blurRadius: 12,
+                        offset: Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              "Upcoming Events",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "Join a sports event near you",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black54,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Divider(height: 1, color: Colors.grey[300]),
+                      ...mockSportEvents.take(3).map((event) => ListTile(
+                            leading: Icon(Icons.event, color: Colors.black),
+                            title: Text(event['name'] ?? 'Unknown Event', style: const TextStyle(fontFamily: 'Poppins')),
+                            subtitle: Text("${event['date']} • ${event['location']}"),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () {
+                              // TODO: Navigate to full event detail screen if desired
+                            },
+                          )),
+                    ],
+                  ),
+                ),
+
 
                 const SizedBox(height: 30),
                 // Add more cards or widgets here
