@@ -3,7 +3,6 @@ import 'package:move_young/screens/activities/activities_screen.dart';
 import 'package:move_young/widgets/custom_bottom_nav_bar.dart';
 import 'package:move_young/data/mock_events.dart';
 
-
 class HomeScreenNew extends StatelessWidget {
   const HomeScreenNew({super.key});
 
@@ -174,10 +173,10 @@ class HomeScreenNew extends StatelessWidget {
                         ),
                       ),
                       Divider(height: 1, color: Colors.grey[300]),
-                      ...mockSportEvents.take(3).map((event) => ListTile(
-                            leading: Icon(Icons.event, color: Colors.black),
-                            title: Text(event['name'] ?? 'Unknown Event', style: const TextStyle(fontFamily: 'Poppins')),
-                            subtitle: Text("${event['date']} • ${event['location']}"),
+                      ...mockEvents.take(3).map((event) => ListTile(
+                            leading: const Icon(Icons.event, color: Colors.black),
+                            title: Text(event.title, style: const TextStyle(fontFamily: 'Poppins')),
+                            subtitle: Text("${event.dateTime} • ${event.location}"),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () {
                               // TODO: Navigate to full event detail screen if desired
