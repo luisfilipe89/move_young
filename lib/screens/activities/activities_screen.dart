@@ -273,12 +273,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 1,
-        onTap: (index) {
-          // Optional navigation
-        },
-      ),
+
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:move_young/screens/home/home_screen.dart';
 import 'package:move_young/screens/activities/activities_screen.dart';
+import 'package:move_young/screens/agenda/agenda_screen.dart';
 import 'package:move_young/widgets/custom_bottom_nav_bar.dart';
 
 class MainScaffold extends StatefulWidget {
@@ -16,6 +17,8 @@ class _MainScaffoldState extends State<MainScaffold> {
   final List<Widget> _screens = [
     const HomeScreenNew(),
     const ActivitiesScreen(),
+    const AgendaScreen(),
+    const Placeholder(),
   ];
 
   @override
@@ -25,9 +28,11 @@ class _MainScaffoldState extends State<MainScaffold> {
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() => _currentIndex = index);
-          },
+          setState(() {
+            _currentIndex = index;
+          });
+        },
       ),
     );
   }
-}
+}  

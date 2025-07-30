@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:move_young/screens/home/home_screen.dart';
+import 'package:move_young/screens/main_scaffold.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +18,7 @@ class MoveYoungApp extends StatelessWidget {
         fontFamily: 'Poppins',
         scaffoldBackgroundColor: Colors.white,
       ),
-      home: const HomeScreenNew(), // ← ensure this is your real entry screen
+      home: const MainScaffold(), // ← ensure this is your real entry screen
     );
   }
 }
