@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Ignore versioned event files but keep the static one
+assets/events/up_events_*.json

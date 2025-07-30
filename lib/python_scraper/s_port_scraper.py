@@ -6,80 +6,144 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 import json
+import os
+from datetime import datetime
 
-# Setup browser
+# Clean old .json files
+events_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/events"))
+os.makedirs(events_dir, exist_ok=True)
+
+for file in os.listdir(events_dir):
+    if file.endswith(".json"):
+        os.remove(os.path.join(events_dir, file))
+
+#Define output files
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+filename = f"up_events_{timestamp}.json"
+output_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/events", filename))
+static_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../assets/events/upcoming_events.json"))
+os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+# Setup headless browser
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
 options.add_argument("--headless=new")
+options.add_argument("--lang=en")
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-# Load page
-driver.get("https://www.aanbod.s-port.nl/activiteiten")
+# Load activities list
+driver.get("https://www.aanbod.s-port.nl")  # Load root first to set cookie
+
+# Inject language cookie
+driver.add_cookie({
+    'name': 'locale',
+    'value': 'en',
+    'path': '/',
+    'domain': 'www.aanbod.s-port.nl'
+})
+
+# Now load the actual activities page
+driver.get("https://www.aanbod.s-port.nl/activiteiten?gemeente%5B0%5D=40&sort=name&order=asc")
+
 print("✅ Page loaded, scrolling...")
 
-# Scroll to load dynamic content
+
+
 for i in range(10):
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    print(f"🔄 Scroll attempt {i + 1}")
-    time.sleep(2.5)
+    time.sleep(2)
 
-# Wait for activity cards
-try:
-    WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, ".text h2 a"))
-    )
-except:
-    print("❌ Timeout waiting for events")
-    driver.save_screenshot("no_events_found.png")
-    driver.quit()
-    raise Exception("No events found")
+WebDriverWait(driver, 15).until(
+    EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".activity"))
+)
 
-# Parse event data
-event_containers = driver.find_elements(By.CSS_SELECTOR, ".text")
-print(f"\n✅ Found {len(event_containers)} events")
+cards = driver.find_elements(By.CSS_SELECTOR, ".activity")
+print(f"🔗 Found {len(cards[:20])} event cards")
 
-all_events = []
+events = []
 
-for card in event_containers:
+def extract_info_dict(raw_text):
+    """
+    Parse multiline block from .info into structured fields.
+    """
+    lines = [line.strip() for line in raw_text.split("\n") if line.strip()]
+    info = {
+        "location": "-",
+        "target_group": "-",
+        "cost": "-",
+        "date_time": "-"
+    }
+    current_key = None
+
+    for line in lines:
+        lower = line.lower()
+        if lower.startswith("locatie") or lower.startswith("location"):
+            current_key = "location"
+        elif lower.startswith("doelgroep") or lower.startswith("target group") or lower.startswith("targetgroup"):
+            current_key = "target_group"
+        elif lower.startswith("kosten") or lower.startswith("cost"):
+            current_key = "cost"
+        elif lower.startswith("datum") or lower.startswith("date"):
+            current_key = "date_time"
+        elif current_key:
+            if info[current_key] == "-":
+                info[current_key] = line
+            else:
+                info[current_key] += " | " + line
+
+    # ✅ Clean up trailing junk from date_time (like 'Add to favorites | More info | Sign up')
+    if info["date_time"] != "-":
+        info["date_time"] = info["date_time"].split("|")[0].strip()
+
+    return info
+
+# Loop through cards
+for idx, card in enumerate(cards[:20]):
     try:
         title_elem = card.find_element(By.CSS_SELECTOR, "h2 a")
         title = title_elem.text.strip()
         url = title_elem.get_attribute("href")
-        organizer = card.find_element(By.CSS_SELECTOR, ".location").text.strip()
+    except:
+        title = "-"
+        url = "-"
 
-        info_items = card.find_elements(By.CSS_SELECTOR, ".info li div:nth-child(2)")
-        location = info_items[0].text.strip() if len(info_items) > 0 else "-"
-        target_group = info_items[1].text.strip() if len(info_items) > 1 else "-"
-        date_time = info_items[2].text.strip() if len(info_items) > 2 else "-"
+    try:
+        organizer = card.find_element(By.CSS_SELECTOR, "span.location").text.strip()
+    except:
+        organizer = "-"
 
-        cost_elements = card.find_elements(By.CSS_SELECTOR, ".info + .costs li")
-        cost = cost_elements[0].text.strip() if cost_elements else "-"
+    try:
+        raw_info = card.find_element(By.CSS_SELECTOR, ".info").text.strip()
+        info = extract_info_dict(raw_info)
+        info["cost"] = info["cost"].lstrip("· ").strip()
+    except:
+        info = {
+            "location": "-",
+            "target_group": "-",
+            "cost": "-",
+            "date_time": "-"
+        }
 
-        # Print for verification
-        print(f"\n📌 Title: {title}")
-        print(f"🔗 URL: {url}")
-        print(f"🎯 Organizer: {organizer}")
-        print(f"📍 Location: {location}")
-        print(f"👥 Target: {target_group}")
-        print(f"🗓️ Date & Time: {date_time}")
-        print(f"💰 Cost: {cost}")
+    print(f"\n➡️ Event {idx+1}: {title}")
 
-        all_events.append({
-            "title": title,
-            "url": url,
-            "organizer": organizer,
-            "location": location,
-            "target_group": target_group,
-            "date_time": date_time,
-            "cost": cost
-        })
+    events.append({
+        "title": title,
+        "url": url,
+        "organizer": organizer,
+        "location": info["location"],
+        "target_group": info["target_group"],
+        "cost": info["cost"],
+        "date_time": info["date_time"]
+    })
 
-    except Exception as e:
-        print("⚠️ Failed to parse one event:", e)
+# Save JSON
+with open(output_path, "w", encoding="utf-8") as f:
+    json.dump(events, f, ensure_ascii=False, indent=2)
 
-# Save to JSON
-with open("lib/python_scraper/upcoming_events.json", "w", encoding="utf-8") as f:
-    json.dump(all_events, f, ensure_ascii=False, indent=2)
+# Save also to static name for Flutter to read
+with open(static_path, "w", encoding="utf-8") as f:
+    json.dump(events, f, ensure_ascii=False, indent=2)
 
-print("\n✅ Saved events to upcoming_events.json")
+
+print("\n✅ Clean and structured data saved to:", output_path)
 driver.quit()

@@ -1,15 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:move_young/screens/activities/activities_screen.dart';
 import 'package:move_young/widgets/custom_bottom_nav_bar.dart';
-import 'package:move_young/data/mock_events.dart';
+import 'package:move_young/models/event_model.dart';
+import 'package:move_young/services/event_loader.dart';
 
-class HomeScreenNew extends StatelessWidget {
+class HomeScreenNew extends StatefulWidget {
   const HomeScreenNew({super.key});
+
+  @override
+  State<HomeScreenNew> createState() => _HomeScreenNewState();
+}
+
+class _HomeScreenNewState extends State<HomeScreenNew> {
+  List<Event> events = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadEvents();
+  }
+
+  Future<void> loadEvents() async {
+    final loaded = await loadEventsFromJson();
+    setState(() {
+      events = loaded;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F3F3), // Light grey background
+      backgroundColor: const Color(0xFFF3F3F3),
       appBar: AppBar(
         backgroundColor: const Color(0xFFF3F3F3),
         elevation: 0,
@@ -62,7 +83,7 @@ class HomeScreenNew extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Tile with image on top and text below
+                // Tile to go to Activities Screen
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -127,8 +148,6 @@ class HomeScreenNew extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height:20),
-                // Upcoming Events Tile
                 const SizedBox(height: 20),
 
                 // Upcoming Events Tile
@@ -173,10 +192,36 @@ class HomeScreenNew extends StatelessWidget {
                         ),
                       ),
                       Divider(height: 1, color: Colors.grey[300]),
-                      ...mockEvents.take(3).map((event) => ListTile(
+                      ...events.take(3).map((event) => ListTile(
                             leading: const Icon(Icons.event, color: Colors.black),
-                            title: Text(event.title, style: const TextStyle(fontFamily: 'Poppins')),
-                            subtitle: Text("${event.dateTime} • ${event.location}"),
+                            title: Text(
+                              event.title,
+                              style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize:15),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  event.dateTime, 
+                                  style: TextStyle(fontSize:13),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                                Text(
+                                  event.targetGroup,
+                                  style: TextStyle(fontSize:13),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                                Text(
+                                  event.location, 
+                                  style: TextStyle(fontSize:13, color: Colors.black87),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                                Text(
+                                  "Prijs: ${event.cost}", 
+                                  style: TextStyle(fontSize:13, color: Colors.grey[700])),
+                              ],
+                            ),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () {
                               // TODO: Navigate to full event detail screen if desired
@@ -185,10 +230,7 @@ class HomeScreenNew extends StatelessWidget {
                     ],
                   ),
                 ),
-
-
                 const SizedBox(height: 30),
-                // Add more cards or widgets here
               ],
             ),
           ),
@@ -197,7 +239,7 @@ class HomeScreenNew extends StatelessWidget {
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 0,
         onTap: (index) {
-          // Optional navigation
+          // Handle navigation
         },
       ),
     );
