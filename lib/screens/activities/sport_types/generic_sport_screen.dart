@@ -6,7 +6,6 @@ import 'package:move_young/services/overpass_service.dart';
 import 'package:move_young/screens/maps/gmaps_screen.dart';
 import 'package:move_young/utils/reverse_geocoding.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:move_young/screens/activities/image_preview_screen.dart';
 import 'package:move_young/config/sport_characteristics.dart';
 import 'package:move_young/config/sport_display_registry.dart';
 import 'package:move_young/services/favorites_service.dart';

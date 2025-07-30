@@ -1,8 +1,8 @@
   import 'package:flutter/material.dart';
   import 'package:move_young/screens/activities/activities_screen.dart';
-  import 'package:move_young/widgets/custom_bottom_nav_bar.dart';
   import 'package:move_young/models/event_model.dart';
   import 'package:move_young/services/event_loader.dart';
+  import 'package:intl/intl.dart';
 
   class HomeScreenNew extends StatefulWidget {
     const HomeScreenNew({super.key});
