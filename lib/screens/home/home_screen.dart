@@ -192,50 +192,46 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                         ),
                       ),
                       Divider(height: 1, color: Colors.grey[300]),
-                      ...events.take(3).map((event) => ListTile(
-                            leading: const Icon(Icons.event, color: Colors.black),
-                            title: Text(
-                              event.title,
-                              style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, fontSize:15),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  event.dateTime, 
-                                  style: TextStyle(fontSize:13),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis),
-                                Text(
-                                  event.targetGroup,
-                                  style: TextStyle(fontSize:13),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis),
-                                Text(
-                                  event.location, 
-                                  style: TextStyle(fontSize:13, color: Colors.black87),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis),
-                                Text(
-                                  "Prijs: ${event.cost}", 
-                                  style: TextStyle(fontSize:13, color: Colors.grey[700])),
-                              ],
-                            ),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () {
+                      SizedBox(
+                        height:240,
+                        child: ListView.builder(
+                          itemCount: events.length,
+                          itemBuilder: (context, index) {
+                            final event = events[index];
+                            return ListTile(
+                              leading: const Icon(Icons.event, color: Colors.black),
+                              title: Text(
+                                event.title,
+                                style: const TextStyle(fontFamily: 'Poppins', fontWeight:FontWeight.bold, fontSize: 15),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(event.dateTime, style: const TextStyle(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    Text(event.targetGroup, style: const TextStyle(fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    Text(event.location, style: const TextStyle(fontSize: 13, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    Text("Prijs: ${event.cost}", style: TextStyle(fontSize: 13, color: Colors.grey[700]), maxLines:1, overflow: TextOverflow.ellipsis),
+                                ],
+                              ),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: () {  
                               // TODO: Navigate to full event detail screen if desired
-                            },
-                          )),
+                              },
+                            );
+                          },  
+                        ),
+                      ),
+                      const SizedBox(height: 30),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 30),
+                  ), // end Column (Upcoming Events Tile)
+                ), // end Container (Upcoming Events Tile)
               ],
-            ),
-          ),
-        ),
-      ),
+            ), // end main Column
+          ), // end main Container
+        ), // end Padding
+      ), // end SingleChildScrollView
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 0,
         onTap: (index) {
