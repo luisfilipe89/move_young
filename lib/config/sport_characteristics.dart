@@ -1,6 +1,6 @@
 class SportCharacteristics {
   // Which characteristics each sport uses
-  static final Map<String, List<String>> registry = {
+  static const Map<String, List<String>> registry = {
     'soccer': ['surface', 'lit'],
     'basketball': ['surface', 'lit', 'hoops'],
     'table_tennis': ['indoor', 'covered'],
@@ -9,7 +9,7 @@ class SportCharacteristics {
   };
 
   // The possible values for each characteristic per sport
-  static final Map<String, Map<String, List<String>>> values = {
+  static const Map<String, Map<String, List<String>>> values = {
     'soccer': {
       'surface': ['grass', 'artificial_turf'],
     },
@@ -19,12 +19,14 @@ class SportCharacteristics {
     'skateboard': {
       'surface': ['concrete', 'wood'],
     },
+    'table_tennis':{},
+    'fitness':{},
     // Add more sports here as needed
   };
 
-  static final Map<String, String> surfaceLabels = {
+  static const Map<String, String> surfaceLabels = {
     'grass': 'Grass',
-    'artifical_turf': 'Artificial',
+    'artificial_turf': 'Artificial',
     'asphalt': 'Asphalt',
     'concrete': 'Concrete',
     'plastic': 'Plastic',
@@ -39,14 +41,17 @@ class SportCharacteristics {
     return values[sportType]?[key] ?? [];
   }
 
-  static String getSurfaceLabel(String surfaceKey) {
-    return surfaceLabels[surfaceKey] ??
-        surfaceKey.replaceAll('_', ' ').capitalize();
+  static String getLabel(String key, Map<String, String> labels) {
+    return labels[key] ?? key.replaceAll('_', ' ').capitalize();
   }
 }
 
 extension StringCasingExtension on String {
-  String capitalize() =>
-      isNotEmpty ? '${this[0].toUpperCase()}${substring(1)}' : '';
+  String capitalize() {
+    return split(' ')
+        .map((word) =>
+            word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
+        .join(' ');
+  }
 }
 

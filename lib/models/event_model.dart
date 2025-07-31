@@ -6,6 +6,7 @@ class Event {
   final String targetGroup;
   final bool isRecurring;
   final String? imageUrl;
+  final String? url;
 
   Event({
     required this.title,
@@ -13,6 +14,7 @@ class Event {
     required this.location,
     required this.cost,
     required this.targetGroup,
+    required this.url,
     this.isRecurring = false,
     this.imageUrl,
   });
@@ -26,7 +28,8 @@ class Event {
       cost: json['cost'] ?? '',
       targetGroup: json['target_group'] ?? '',
       isRecurring: json['isRecurring'] ?? false,
-      imageUrl: json['image_url'],
+      imageUrl: json['imageUrl'],
+      url: json['url'] ?? '',
     );
   }
 }

@@ -108,6 +108,12 @@ for idx, card in enumerate(cards[:20]):
         url = "-"
 
     try:
+        image_elem = card.find_element(By.CSS_SELECTOR,"img")
+        image_url = image_elem.get_attribute("src")
+    except:
+        image_url = ""
+
+    try:
         organizer = card.find_element(By.CSS_SELECTOR, "span.location").text.strip()
     except:
         organizer = "-"
@@ -133,7 +139,8 @@ for idx, card in enumerate(cards[:20]):
         "location": info["location"],
         "target_group": info["target_group"],
         "cost": info["cost"],
-        "date_time": info["date_time"]
+        "date_time": info["date_time"],
+        "imageUrl" : image_url
     })
 
 # Save JSON

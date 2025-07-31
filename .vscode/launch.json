@@ -7,12 +7,14 @@
       "type": "dart",
       "deviceId": "RF8N31RNCLX",
       "flutterMode": "debug",
+      "preLaunchTask": "Flutter Clean & Get"
     },
     {
       "name": "Flutter: Launch Chrome",
       "request": "launch",
       "type": "dart",
-      "deviceId": "chrome"
+      "deviceId": "chrome",
+      "preLaunchTask": "Flutter Clean & Get"
     }    
   ]
 }

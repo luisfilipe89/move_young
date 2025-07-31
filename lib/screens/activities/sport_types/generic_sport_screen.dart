@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:move_young/services/overpass_service.dart';
 import 'package:move_young/screens/maps/gmaps_screen.dart';
@@ -8,7 +9,7 @@ import 'package:move_young/utils/reverse_geocoding.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:move_young/config/sport_characteristics.dart';
 import 'package:move_young/config/sport_display_registry.dart';
-import 'package:move_young/services/favorites_service.dart';
+
 
 
 class GenericSportScreen extends StatefulWidget {
@@ -47,12 +48,23 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
   }
 
   Future<void> _loadFavorites() async {
-    final favs = await FavoritesService.getFavorites();
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _favoriteIds = favs;
+      _favoriteIds = prefs.getStringList('favoriteSportLocations')?.toSet() ?? {};
     });
   }
 
+  Future<void> _toggleFavorite(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      if (_favoriteIds.contains(id)) {
+        _favoriteIds.remove(id);
+      } else {
+        _favoriteIds.add(id);
+      }
+      prefs.setStringList('favoriteSportLocations', _favoriteIds.toList());
+    });
+  }
   @override
   void dispose() {
     _searchController.dispose();
@@ -170,17 +182,10 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
 
   Future<void> _shareLocation(String name, String lat, String lon) async {
     final message = "Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lon";
-    final result = await SharePlus.instance.share(
-      ShareParams(text:message)
-    );
-
-    if (result.status == ShareResultStatus.success) {
-      debugPrint("User successfully shared the location");
-    } else {
-      debugPrint("User dismissed or canceled sharing");
-    }
+    await Share.share(message);
   }
 
+  
   String _formatDistance(double distance) {
     if (distance == double.infinity) return 'Distance unknown';
     return distance < 1000
@@ -265,7 +270,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
         children: [
           if(hasSurface)
             ...surfaceOptions.map((surface) {
-              final label = SportCharacteristics.getSurfaceLabel(surface);
+              final label = SportCharacteristics.getLabel(surface,SportCharacteristics.surfaceLabels);
               final isSelected = _selectedSurface == surface;
               return Padding(
                 padding: const EdgeInsets.only(right: 8.0),
@@ -505,42 +510,41 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
 
                                   //Build Characteristics          
                                   _buildCharacteristicsRow(field),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 6),
 
                                   //Action Buttons
-                                  Row(
-                                    children: [
-                                      _buildActionIcon(
-                                        icon: _favoriteIds.contains('$lat,$lon') ? Icons.favorite : Icons.favorite_border,
-                                        color: _favoriteIds.contains('$lat,$lon') ? Colors.red : Colors.black,
-                                        tooltip: 'Favorite',
-                                        onPressed: () async {
-                                          final id = '$lat,$lon';
-                                          await FavoritesService.toggleFavorite(id);
-                                          setState(() {
-                                            if (_favoriteIds.contains(id)) {
-                                              _favoriteIds.remove(id);
-                                            } else {
-                                              _favoriteIds.add(id);
-                                            }
-                                          });
-                                        },
-                                      ),
-                                      _buildActionIcon(
-                                        icon: Icons.share,
-                                        tooltip: 'Share Location',
-                                        onPressed: () async {
-                                          final name = await _getDisplayName(field);
-                                          _shareLocation(name, lat, lon);
-                                        },
-                                      ),
-                                      _buildActionIcon(
-                                        icon: Icons.directions,
-                                        tooltip: 'Directions',
-                                        onPressed: () => _openDirections(lat, lon),
-                                      ),
-                                    ],
-                                  ),
+                                  Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top:4),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          _buildActionIcon(
+                                            icon: _favoriteIds.contains('$lat,$lon') ? Icons.favorite : Icons.favorite_border,
+                                            color: _favoriteIds.contains('$lat,$lon') ? Colors.red : Colors.black,
+                                            tooltip: 'Favorite',
+                                            onPressed: () async {
+                                            final id = '$lat,$lon';
+                                            await _toggleFavorite(id);
+                                            },
+                                          ),
+                                          _buildActionIcon(
+                                            icon: Icons.share,
+                                            tooltip: 'Share Location',
+                                            onPressed: () async {
+                                            final name = await _getDisplayName(field);
+                                            _shareLocation(name, lat, lon);
+                                            },
+                                          ),
+                                          _buildActionIcon(
+                                            icon: Icons.directions,
+                                            tooltip: 'Directions',
+                                            onPressed: () => _openDirections(lat, lon),
+                                          ),
+                                        ],
+                                      ),  
+                                    ),
+                                  ),  
                                 ],
                               ),
                             ),
@@ -553,9 +557,9 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                 ],
               ),
             ),
-      );
-    }
+          );
   }
+}
 
 class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;

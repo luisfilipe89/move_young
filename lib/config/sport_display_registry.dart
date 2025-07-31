@@ -3,34 +3,24 @@ import 'package:move_young/screens/activities/sport_types/football_fields.dart';
 import 'package:move_young/screens/activities/sport_types/basketball_courts.dart';
 import 'package:move_young/screens/activities/sport_types/table_tennis.dart';
 
-
-typedef TagIconConfig = Map<String, (IconData, Color)>;
-typedef TagFormatter = String Function(String key, String? value);
-
 class SportDisplayRegistry {
+  static final Map<String, TagIconConfig> _iconMapRegistry = {
+    'soccer': FootballFieldDisplay.tagIcons,
+    'basketball': BasketballFieldDisplay.tagIcons,
+    'table_tennis': TableTennisDisplay.tagIcons,
+  };
+
+  static final Map<String, TagFormatter> _formatterRegistry = {
+    'soccer': FootballFieldDisplay.formatValue,
+    'basketball': BasketballFieldDisplay.formatValue,
+    'table_tennis': TableTennisDisplay.formatValue,
+  };
+
   static TagIconConfig getIconMap(String sportType) {
-    switch (sportType) {
-      case 'soccer':
-        return FootballFieldDisplay.tagIcons;
-      case 'basketball':
-        return BasketballFieldDisplay.tagIcons;
-      case 'table_tennis':
-        return TableTennisDisplay.tagIcons;
-      default:
-        return {};
-    }
+    return _iconMapRegistry[sportType] ?? {};
   }
 
   static TagFormatter getFormatter(String sportType) {
-    switch (sportType) {
-      case 'soccer':
-        return FootballFieldDisplay.formatValue;
-      case 'basketball':
-        return BasketballFieldDisplay.formatValue;
-      case 'table_tennis':
-        return TableTennisDisplay.formatValue;
-      default:
-        return (key, value) => value ?? 'Unknown';
-    }
+    return _formatterRegistry[sportType] ?? (key, value) => value ?? 'Unknown';
   }
 }
