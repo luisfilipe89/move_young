@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class NavigationUtils {
-  static Future<void> shareLocation(String name, String lat, String lon) async{
-    final message = "Meet me at $name! 📍 https://maps.google.com/?q=$lat,$lon";
+  static Future<void> shareLocation(String name, String lat, String lon) async {
+    final message =
+        "${'meet_me'.tr()} $name! 📍 https://maps.google.com/?q=$lat,$lon";
     final result = await SharePlus.instance.share(
-      ShareParams(text:message),
+      ShareParams(text: message),
     );
 
     if (result.status == ShareResultStatus.success) {
-      debugPrint("User successfully shared the location");
+      debugPrint('user_shared_location'.tr());
     } else {
-      debugPrint("User dismissed or canceled sharing");
-   }
-  } 
+      debugPrint("user_dismissed_sharing".tr());
+    }
+  }
 
-  static Future<void> openDirections(BuildContext context, String lat, String lon) async {
-    final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
+  static Future<void> openDirections(
+      BuildContext context, String lat, String lon) async {
+    final url =
+        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
     final uri = Uri.parse(url);
 
     final canLaunch = await canLaunchUrl(uri);
@@ -28,7 +32,7 @@ class NavigationUtils {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open Google Maps')),
+            SnackBar(content: Text('could_not_open_maps'.tr())),
           );
         }
       });

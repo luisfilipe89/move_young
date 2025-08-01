@@ -2,11 +2,19 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Flutter Clean & Get",
+      "label": "flutter prepare",
       "type": "shell",
-      "command": "flutter clean; flutter pub get",
+      "command": "./.vscode/flutter_prepare.sh",
+      "options": {
+        "shell": {
+          "executable": "C:\\Program Files\\Git\\bin\\bash.exe"
+        }
+      },
       "problemMatcher": [],
-      "group": "build"
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }

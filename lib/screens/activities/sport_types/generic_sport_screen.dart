@@ -6,9 +6,10 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:move_young/services/overpass_service.dart';
 import 'package:move_young/screens/maps/gmaps_screen.dart';
 import 'package:move_young/utils/reverse_geocoding.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:move_young/config/sport_characteristics.dart';
 import 'package:move_young/config/sport_display_registry.dart';
+import 'package:move_young/widgets/sport_field_card.dart';
+import 'dart:async';
 
 
 
@@ -26,13 +27,14 @@ class GenericSportScreen extends StatefulWidget {
   State<GenericSportScreen> createState() => _GenericSportScreenState();
 }
 
-class _GenericSportScreenState extends State<GenericSportScreen> {
+class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticKeepAliveClientMixin{
   Set<String> _favoriteIds = {}; // ✅ Favorite locations
   List<Map<String, dynamic>> _allLocations = [];
   List<Map<String, dynamic>> _filteredLocations = [];
   bool _isLoading = true;
   String? _error;
   Position? _userPosition;
+  Timer? _debounce;
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -67,6 +69,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
   }
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -224,16 +227,22 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
       final value = formatValue(key, rawValue);
 
       IconData iconData;
-      Color color = iconMap[key]?.$2 ?? Colors.grey;
+      Color color;
+
 
       if (key == 'lit'){
         iconData = (rawValue =='yes') ? Icons.lightbulb: Icons.lightbulb_outline;
         color = Colors.amber;
       } else {
-        iconData = iconMap[key]?.$1 ?? Icons.info_outline;
-        color = iconMap[key]?.$2 ?? Colors.grey;
+        iconData = (iconMap[key] != null && iconMap[key]!.isNotEmpty)
+          ? iconMap[key]![0] as IconData
+          : Icons.info_outline;
+        
+      color = (iconMap[key] != null && iconMap[key]!.length > 1)
+        ? iconMap[key]![1] as Color
+        : Colors.grey;
       }
-      
+
       characteristics.add(Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -314,22 +323,12 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
     );
   }      
 
-  Widget _buildActionIcon({
-  required IconData icon,
-  required VoidCallback onPressed,
-  Color color = Colors.black,
-  String? tooltip,
-}) {
-  return IconButton(
-    icon: Icon(icon, size: 24, color: color),
-    tooltip: tooltip,
-    splashRadius: 24,
-    onPressed: onPressed,
-  );
-}
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -371,31 +370,34 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                       delegate: _StickyHeaderDelegate(
                         child: Column(
                           children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: _searchController,
-                                    decoration: InputDecoration(
-                                      hintText: 'Search by name or address...',
-                                      filled: true,
-                                      fillColor: Colors.grey[200],
-                                      prefixIcon: const Icon(Icons.search),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                        borderSide: BorderSide.none,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _searchController,
+                                      decoration: InputDecoration(
+                                        hintText: 'Search by name or address...',
+                                        filled: true,
+                                        fillColor: Colors.grey[200],
+                                        prefixIcon: const Icon(Icons.search),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
                                       ),
+                                      onChanged: (value) {
+                                        if (_debounce?.isActive ?? false) _debounce!.cancel();
+                                        _debounce = Timer(const Duration(milliseconds: 300), () {  
+                                          setState(() {
+                                            _searchQuery = value;
+                                            _applyFilters();
+                                          });
+                                        });
+                                      },
                                     ),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _searchQuery = value;
-                                        _applyFilters();
-                                      });
-                                    },
-                                  ),
-                                ),
+                                  ),    
                                 const SizedBox(width: 8),
                                 GestureDetector(
                                   onTap: () {
@@ -425,142 +427,60 @@ class _GenericSportScreenState extends State<GenericSportScreen> {
                         ],
                       ),
                     ),
-                  ),
-                    SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context,index) {
-                        final field = _filteredLocations[index];
-                        final lat = field['lat'].toString();
-                        final lon = field['lon'].toString();
-                        final distance = field['distance'] as double;
-                        final imageUrl = field['tags']?['image'];
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
-                            ),
+                    ),
+                    _filteredLocations.isEmpty
+                        ? SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  //Image
-                                  if (imageUrl != null)
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: CachedNetworkImage(
-                                        imageUrl: imageUrl,
-                                        height: 140,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) => const SizedBox(
-                                          height: 140,
-                                          child: Center(child: CircularProgressIndicator()),
-                                        ),
-                                        errorWidget: (context, url, error) => Container(
-                                          height: 140,
-                                          color: Colors.grey[300],
-                                          child: const Icon(Icons.broken_image),
-                                        ),
-                                      ),
-                                    )
-                                  else  
-                                    Container(
-                                      height: 140,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[200],
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: const Center(child: Icon(Icons.image_not_supported)),
-                                    ),
-                                  const SizedBox(height: 2),
-
-                                  //Title
-                                  FutureBuilder<String>(
-                                    future: _getDisplayName(field),
-                                    builder: (context, snapshot) {
-                                      return Text(
-                                        snapshot.data ?? 'Unnamed Field',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Poppins',
-                                        ),
-                                      );
-                                    },
+                              padding: const EdgeInsets.all(24),
+                              child: Center(
+                                child: Text(
+                                  'No fields found.\nTry changing filters or search.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 16,
+                                    fontFamily: 'Poppins',
                                   ),
-                                  const SizedBox(height: 4),
-
-                                  //Distance
-                                  Text(
-                                    _formatDistance(distance),
-                                    style: const TextStyle(color: Colors.black54),
-                                  ),
-                                  const SizedBox(height: 8),
-
-                                  //Build Characteristics          
-                                  _buildCharacteristicsRow(field),
-                                  const SizedBox(height: 6),
-
-                                  //Action Buttons
-                                  Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(top:4),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          _buildActionIcon(
-                                            icon: _favoriteIds.contains('$lat,$lon') ? Icons.favorite : Icons.favorite_border,
-                                            color: _favoriteIds.contains('$lat,$lon') ? Colors.red : Colors.black,
-                                            tooltip: 'Favorite',
-                                            onPressed: () async {
-                                            final id = '$lat,$lon';
-                                            await _toggleFavorite(id);
-                                            },
-                                          ),
-                                          _buildActionIcon(
-                                            icon: Icons.share,
-                                            tooltip: 'Share Location',
-                                            onPressed: () async {
-                                            final name = await _getDisplayName(field);
-                                            _shareLocation(name, lat, lon);
-                                            },
-                                          ),
-                                          _buildActionIcon(
-                                            icon: Icons.directions,
-                                            tooltip: 'Directions',
-                                            onPressed: () => _openDirections(lat, lon),
-                                          ),
-                                        ],
-                                      ),  
-                                    ),
-                                  ),  
-                                ],
+                                ),
                               ),
                             ),
+                          )
+                        : SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final field = _filteredLocations[index];
+                                final lat = field['lat'].toString();
+                                final lon = field['lon'].toString();
+                                final distance = field['distance'] as double;
+
+                                return SportFieldCard(
+                                  field: field,
+                                  isFavorite: _favoriteIds.contains('$lat,$lon'),
+                                  distanceText: _formatDistance(distance),
+                                  getDisplayName: _getDisplayName,
+                                  characteristics: _buildCharacteristicsRow(field),
+                                  onToggleFavorite: () async {
+                                    final id = '$lat,$lon';
+                                    await _toggleFavorite(id);
+                                  },
+                                  onShare: () async {
+                                    final name = await _getDisplayName(field);
+                                    _shareLocation(name, lat, lon);
+                                  },
+                                  onDirections: () => _openDirections(lat, lon),
+                                );
+                              },
+                              childCount: _filteredLocations.length,
+                            ),
                           ),
-                        );
-                      },  
-                      childCount: _filteredLocations.length,
-                    ),
-                  ),   
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
+    );
   }
 }
 
+//Sticky Header Class
 class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
 

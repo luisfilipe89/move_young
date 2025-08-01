@@ -12,23 +12,14 @@ class FootballFieldScreen extends StatelessWidget {
     );
   }
 }
-
 class FootballFieldDisplay {
-  /// Map of tag keys to icons and colors
-  static const Map<String, (IconData, Color)> tagIcons = {
-    'surface': (Icons.sports_soccer, Colors.green),
-    'lit': (Icons.lightbulb_outline, Colors.amber),
+  static final Map<String, List<dynamic>> tagIcons = {
+    'surface': [Icons.grass, Colors.green],
+    'lit': [Icons.lightbulb, Colors.amber],
   };
 
-  /// Format values for display, e.g. lit → Lit/Unlit
   static String formatValue(String key, String? value) {
-    switch (key) {
-      case 'lit':
-        return value == 'yes' ? 'Lit' : 'Unlit';
-      case 'surface':
-        return value?.isNotEmpty == true ? value! : 'Unknown';
-      default:
-        return value ?? 'Unknown';
-    }
+    if (key == 'lit') return value == 'yes' ? 'Yes' : 'No';
+    return value ?? 'Unknown';
   }
 }

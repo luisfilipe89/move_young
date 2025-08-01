@@ -13,26 +13,45 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _currentIndex = 0;
+  int _previousIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreenNew(),
-    const ActivitiesScreen(),
-    const AgendaScreen(),
-    const Placeholder(),
+  final List<Widget> _screens = const [
+    HomeScreenNew(),
+    ActivitiesScreen(),
+    AgendaScreen(),
+    Placeholder(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final isForward = _currentIndex > _previousIndex;
+
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          final offsetAnimation = Tween<Offset>(
+            begin: isForward ? const Offset(1.0, 0.0) : const Offset(-1.0, 0.0),
+            end: Offset.zero,
+          ).animate(animation);
+          return SlideTransition(position: offsetAnimation, child: child);
+        },
+        child: KeyedSubtree(
+          key: ValueKey(_currentIndex),
+          child: _screens[_currentIndex],
+        ),
+      ),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          if (_currentIndex != index) {
+            setState(() {
+              _previousIndex = _currentIndex;
+              _currentIndex = index;
+            });
+          }
         },
       ),
     );
   }
-}  
+}

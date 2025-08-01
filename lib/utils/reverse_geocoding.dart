@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:easy_localization/easy_localization.dart';
 
 Future<String> getNearestStreetName(double lat, double lon) async {
-
   final url = Uri.parse(
     'https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lon&format=json',
   );
@@ -20,6 +20,6 @@ Future<String> getNearestStreetName(double lat, double lon) async {
         address['suburb'] ??
         'Unnamed Location';
   } else {
-    return 'Unnamed Location';
+    return 'unnamed_location'.tr();
   }
 }

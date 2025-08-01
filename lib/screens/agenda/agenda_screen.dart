@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:move_young/models/event_model.dart';
-import 'package:move_young/services/event_loader.dart';
+import 'package:move_young/services/load_events_from_json.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,10 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:move_young/constants.dart';
 import 'dart:async';
-
-
-
-
+import 'package:easy_localization/easy_localization.dart';
 
 class AgendaScreen extends StatefulWidget {
   const AgendaScreen({super.key});
@@ -27,7 +24,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
   List<Event> filteredEvents = [];
 
   String _searchQuery = '';
-  String _sortOption = 'Date';
   bool _showRecurring = true;
   bool _showOneTime = true;
   Timer? _debounce;
@@ -57,10 +53,10 @@ class _AgendaScreenState extends State<AgendaScreen> {
       prefs.setStringList('favoriteEvents', _favoriteTitles.toList());
     });
   }
-  
+
   Future<void> _shareEvent(Event event) async {
     final String text;
-    
+
     if (event.url?.isNotEmpty ?? false) {
       text = '${event.title}\n${event.url!}';
     } else {
@@ -70,26 +66,26 @@ class _AgendaScreenState extends State<AgendaScreen> {
     await Share.share(text);
   }
 
-void _onSearchChanged(String query) {
-  if (_debounce?.isActive ?? false) _debounce!.cancel();
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
 
-  _debounce = Timer(const Duration(milliseconds: 300), () {
-    setState(() {
-      _searchQuery = query;
-      _applyFilters();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      setState(() {
+        _searchQuery = query;
+        _applyFilters();
+      });
     });
-  });
-}
-
+  }
 
   Future<void> _openDirections(String location) async {
     final query = Uri.encodeComponent(location);
-    final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+    final uri =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open Google Maps')),
+        SnackBar(content: Text('could_not_open_google_maps'.tr())),
       );
     }
   }
@@ -111,7 +107,8 @@ void _onSearchChanged(String query) {
 
   void _applyFilters() {
     List<Event> events = allEvents.where((event) {
-      final queryMatch = event.title.toLowerCase().contains(_searchQuery.toLowerCase());
+      final queryMatch =
+          event.title.toLowerCase().contains(_searchQuery.toLowerCase());
       final isRecurring = event.isRecurring;
 
       if (!queryMatch) return false;
@@ -121,12 +118,6 @@ void _onSearchChanged(String query) {
       return true;
     }).toList();
 
-    //Sorting
-    if (_sortOption == 'Date') {
-      events.sort((a, b) => a.dateTime.compareTo(b.dateTime));
-    } else if (_sortOption == 'Age Group') {
-      events.sort((a, b) => a.targetGroup.compareTo(b.targetGroup));
-    }
     // Setstate
     setState(() {
       filteredEvents = events;
@@ -140,28 +131,14 @@ void _onSearchChanged(String query) {
     }
   }
 
-  Widget _buildFilterChips() {
+  Widget _buildFilterChipsRow() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Wrap(
+        spacing: 12,
         children: [
-          DropdownButton<String>(
-            value: _sortOption,
-            items: ['Date', 'Age Group']
-                .map((e) => DropdownMenuItem(value: e, child: Text('Sort by $e')))
-                .toList(),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _sortOption = value;
-                  _applyFilters();
-                });
-              }
-            },
-          ),
-          const SizedBox(width: 12),
           FilterChip(
-            label: const Text('Recurring'),
+            label: Text('recurring').tr(),
             selected: _showRecurring,
             onSelected: (selected) {
               setState(() {
@@ -170,9 +147,8 @@ void _onSearchChanged(String query) {
               });
             },
           ),
-          const SizedBox(width: 8),
           FilterChip(
-            label: const Text('One-time'),
+            label: Text('one_time'.tr()),
             selected: _showOneTime,
             onSelected: (selected) {
               setState(() {
@@ -185,22 +161,21 @@ void _onSearchChanged(String query) {
       ),
     );
   }
-  
+
   Widget _buildShimmerPlaceholder() {
     return Shimmer.fromColors(
       baseColor: Colors.grey,
       highlightColor: Colors.white,
       child: Container(
-        height:kImageHeight,
-        width:double.infinity,
+        height: kImageHeight,
+        width: double.infinity,
         decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(12))
-        ),
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(12))),
       ),
     );
   }
-  
+
   Widget _buildEventCard(Event event) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -218,129 +193,140 @@ void _onSearchChanged(String query) {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            //Event Image
-            if (event.imageUrl?.isNotEmpty ?? false)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(kImageRadius),
-                child: CachedNetworkImage(
-                  imageUrl: event.imageUrl!,
-                  height:kImageHeight,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  //Smooth fade in
-                  fadeInDuration: kFadeDuration,
-                  fadeInCurve: Curves.easeInOut,
-                  //Shimmer
-                  placeholder: (context, url) => _buildShimmerPlaceholder(),
-                  //Shown if image fails to load
-                  errorWidget: (context, url, error) => Container(
-                    height: kImageHeight,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.broken_image),
-                  ),
-                ),
-              )
-            else
-              Container(
+        children: [
+          //Event Image
+          if (event.imageUrl?.isNotEmpty ?? false)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(kImageRadius),
+              child: CachedNetworkImage(
+                imageUrl: event.imageUrl!,
                 height: kImageHeight,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(kImageRadius),
+                width: double.infinity,
+                fit: BoxFit.cover,
+                //Smooth fade in
+                fadeInDuration: kFadeDuration,
+                fadeInCurve: Curves.easeInOut,
+                //Shimmer
+                placeholder: (context, url) => _buildShimmerPlaceholder(),
+                //Shown if image fails to load
+                errorWidget: (context, url, error) => Container(
+                  height: kImageHeight,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.broken_image),
                 ),
-                child: const Center(child: Icon(Icons.image_not_supported)),
               ),
-            const SizedBox(height:8),
-              
-            //Event info
-            Text(
-              event.title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Poppins',
+            )
+          else
+            Container(
+              height: kImageHeight,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(kImageRadius),
               ),
-            ),  
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.access_time, size: 16, color: Colors.grey[700]),
-                const SizedBox(width: 4),
-                Text(event.dateTime, style: const TextStyle(color: Colors.black54)),
-              ],
+              child: const Center(child: Icon(Icons.image_not_supported)),
             ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 16, color: Colors.grey[700]),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(event.location, style: const TextStyle(color: Colors.black54)),
-                ),
-              ],
+          const SizedBox(height: 8),
+
+          //Event info
+          Text(
+            event.title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
             ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(Icons.group, size: 16, color: Colors.grey[700]),
-                const SizedBox(width:4),
-                Text(event.targetGroup, style: const TextStyle(fontSize:13)),
-              ],
-            ),
-            const SizedBox(height:4),
-            Row(
-              children: [
-                Icon(Icons.euro, size: 16, color: Colors.grey[700]),
-                const SizedBox(width: 4),
-                Text(
-                  event.cost.replaceAll('€','').trim(), 
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.access_time, size: 16, color: Colors.grey[700]),
+              const SizedBox(width: 4),
+              Text(event.dateTime,
+                  style: const TextStyle(color: Colors.black54)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.location_on, size: 16, color: Colors.grey[700]),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(event.location,
+                    style: const TextStyle(color: Colors.black54)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.group, size: 16, color: Colors.grey[700]),
+              const SizedBox(width: 4),
+              Text(event.targetGroup, style: const TextStyle(fontSize: 13)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.euro, size: 16, color: Colors.grey[700]),
+              const SizedBox(width: 4),
+              Text(
+                event.cost.replaceAll('€', '').trim(),
+                style:
+                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Action Buttons + Enrol
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              IconButton(
+                icon: Icon(
+                  _favoriteTitles.contains(event.title)
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: _favoriteTitles.contains(event.title)
+                      ? Colors.red
+                      : Colors.black,
                 ),
-              ],
-            ),  
-            const SizedBox(height:12),
-            // Action Buttons + Enrol
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    _favoriteTitles.contains(event.title) ? Icons.favorite: Icons.favorite_border,
-                    color: _favoriteTitles.contains(event.title) ? Colors.red : Colors.black,
-                  ),
-                  tooltip: 'Favorite',
-                  onPressed: () => _toggleFavorite(event.title),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.share),
-                  tooltip: 'Share Event',
-                  onPressed: () => _shareEvent(event),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.directions),
-                  tooltip: 'Open in Maps',
-                  onPressed: () => _openDirections(event.location),
-                ),
-                if (event.url != null && event.url!.trim().isNotEmpty)
-                  ElevatedButton.icon(
-                    onPressed: () async{
-                      final url = event.url!.trim();
-                      final uri = Uri.parse(url);
+                tooltip: 'Favorite',
+                onPressed: () => _toggleFavorite(event.title),
+              ),
+              IconButton(
+                icon: const Icon(Icons.share),
+                tooltip: 'Share Event',
+                onPressed: () => _shareEvent(event),
+              ),
+              IconButton(
+                icon: const Icon(Icons.directions),
+                tooltip: 'Open in Maps',
+                onPressed: () => _openDirections(event.location),
+              ),
+              if (event.url != null && event.url!.trim().isNotEmpty)
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final url = event.url!.trim();
+                    final uri = Uri.parse(url);
                     if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                      await launchUrl(uri,
+                          mode: LaunchMode.externalApplication);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Could not open the enrolment page')),
+                        const SnackBar(
+                            content: Text('Could not open the enrolment page')),
                       );
                     }
                   },
                   icon: const Icon(Icons.open_in_new),
-                  label: const Text('Inschrijven'),
+                  label: Text('to_enroll'.tr()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
                 ),
             ],
@@ -371,7 +357,7 @@ void _onSearchChanged(String query) {
               elevation: 0,
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,
-              title: const Text('Agenda'),
+              title: Text('agenda'.tr()),
             ),
             SliverToBoxAdapter(
               child: Padding(
@@ -379,7 +365,7 @@ void _onSearchChanged(String query) {
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search events...',
+                    hintText: 'search_events'.tr(),
                     filled: true,
                     fillColor: Colors.grey[200],
                     prefixIcon: const Icon(Icons.search),
@@ -392,7 +378,7 @@ void _onSearchChanged(String query) {
                 ),
               ),
             ),
-            SliverToBoxAdapter(child: _buildFilterChips()),
+            SliverToBoxAdapter(child: _buildFilterChipsRow()),
             SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {

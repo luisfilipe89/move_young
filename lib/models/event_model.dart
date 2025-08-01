@@ -15,21 +15,27 @@ class Event {
     required this.cost,
     required this.targetGroup,
     required this.url,
-    this.isRecurring = false,
+    required this.isRecurring,
     this.imageUrl,
   });
 
-  // Factory constructor to convert JSON into an Event
   factory Event.fromJson(Map<String, dynamic> json) {
+    final String rawDateTime = json['date_time'] ?? '';
+
+    final bool inferredRecurring =
+        !(rawDateTime.toLowerCase().contains('1x op') ||
+            rawDateTime.toLowerCase().contains('contact op na inschrijving'));
+
     return Event(
       title: json['title'] ?? '',
-      dateTime: json['date_time'] ?? '',
+      dateTime: rawDateTime,
       location: json['location'] ?? '',
       cost: json['cost'] ?? '',
       targetGroup: json['target_group'] ?? '',
-      isRecurring: json['isRecurring'] ?? false,
-      imageUrl: json['imageUrl'],
       url: json['url'] ?? '',
+      imageUrl: json['imageUrl'],
+      isRecurring: json['isRecurring'] ??
+          inferredRecurring, // fallback to inferred if missing
     );
   }
 }

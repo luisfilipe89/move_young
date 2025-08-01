@@ -14,9 +14,9 @@ class TableTennisScreen extends StatelessWidget {
 }
 
 class TableTennisDisplay {
-  static final Map<String, (IconData, Color)> tagIcons = {
-    'indoor': (Icons.home, Colors.blue),
-    'covered': (Icons.roofing, Colors.blue),
+  static final Map<String, List<dynamic>> tagIcons = {
+    'indoor': [Icons.home, Colors.blue],
+    'covered': [Icons.roofing, Colors.blue],
   };
 
   static String formatValue(String key, String? value) {

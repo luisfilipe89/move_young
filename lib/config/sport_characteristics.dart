@@ -1,3 +1,6 @@
+import 'package:move_young/utils/string_extensions.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 class SportCharacteristics {
   // Which characteristics each sport uses
   static const Map<String, List<String>> registry = {
@@ -19,18 +22,18 @@ class SportCharacteristics {
     'skateboard': {
       'surface': ['concrete', 'wood'],
     },
-    'table_tennis':{},
-    'fitness':{},
+    'table_tennis': {},
+    'fitness': {},
     // Add more sports here as needed
   };
 
   static const Map<String, String> surfaceLabels = {
-    'grass': 'Grass',
-    'artificial_turf': 'Artificial',
-    'asphalt': 'Asphalt',
-    'concrete': 'Concrete',
-    'plastic': 'Plastic',
-    'wood': 'Wood',
+    'grass': 'grass',
+    'artificial_turf': 'artificial_turf',
+    'asphalt': 'asphalt',
+    'concrete': 'concrete',
+    'plastic': 'plastic',
+    'wood': 'wood',
   };
 
   static List<String> get(String sportType) {
@@ -42,16 +45,7 @@ class SportCharacteristics {
   }
 
   static String getLabel(String key, Map<String, String> labels) {
-    return labels[key] ?? key.replaceAll('_', ' ').capitalize();
+    final translationKey = labels[key] ?? key;
+    return translationKey.tr();
   }
 }
-
-extension StringCasingExtension on String {
-  String capitalize() {
-    return split(' ')
-        .map((word) =>
-            word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
-        .join(' ');
-  }
-}
-

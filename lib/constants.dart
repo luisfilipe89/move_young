@@ -12,3 +12,4 @@ const double kImageRadius = 12.0;
 
 // Durations
 const Duration kFadeDuration = Duration(milliseconds: 300);
+
