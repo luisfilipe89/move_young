@@ -6,8 +6,12 @@
       "type": "shell",
       "command": "./.vscode/flutter_prepare.sh",
       "options": {
+        "cwd": "${workspaceFolder}",
         "shell": {
-          "executable": "C:\\Program Files\\Git\\bin\\bash.exe"
+          "executable": "C:\\Program Files\\Git\\bin\\bash.exe",
+          "args": [
+            "-c"
+          ]
         }
       },
       "problemMatcher": [],

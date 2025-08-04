@@ -89,16 +89,6 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
       final position = LatLng(parsedLat, parsedLon);
       positions.add(position);
 
-      final surfaceRaw =
-          (loc['surface'] ?? '').toString().replaceAll('_', ' ').toLowerCase();
-      final surface =
-          surfaceRaw.isNotEmpty ? surfaceRaw.capitalize() : 'Unknown';
-
-      final name = (loc['name'] ?? '').toString().trim();
-      final displayName = (name.isNotEmpty && name.toLowerCase() != surfaceRaw)
-          ? name
-          : '$parsedLat, $parsedLon';
-
       final lit = loc['lit'] == 'yes' || loc['lit'] == true;
 
       final markerColor = BitmapDescriptor.defaultMarkerWithHue(

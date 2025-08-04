@@ -77,27 +77,36 @@ class _AgendaScreenState extends State<AgendaScreen> {
     });
   }
 
-  Future<void> _openDirections(String location) async {
+  Future<void> _openDirections(BuildContext context, String location) async {
     final query = Uri.encodeComponent(location);
     final uri =
         Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('could_not_open_google_maps'.tr())),
-      );
+      // ✅ Safe usage after async: defer with post-frame callback
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('could_not_open_google_maps'.tr())),
+          );
+        }
+      });
     }
   }
 
   Future<void> loadEvents() async {
     final loaded = await loadEventsFromJson();
+
+    if (!mounted) return;
+
     setState(() {
       allEvents = loaded;
       _applyFilters();
     });
 
-    //Preload few images from the full list
+    // Preload few images from the full list
     for (var event in allEvents.take(5)) {
       if (event.imageUrl?.isNotEmpty ?? false) {
         precacheImage(CachedNetworkImageProvider(event.imageUrl!), context);
@@ -301,7 +310,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
               IconButton(
                 icon: const Icon(Icons.directions),
                 tooltip: 'Open in Maps',
-                onPressed: () => _openDirections(event.location),
+                onPressed: () => _openDirections(context, event.location),
               ),
               if (event.url != null && event.url!.trim().isNotEmpty)
                 ElevatedButton.icon(
@@ -311,7 +320,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
                     if (await canLaunchUrl(uri)) {
                       await launchUrl(uri,
                           mode: LaunchMode.externalApplication);
-                    } else {
+                    } else if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text('Could not open the enrolment page')),

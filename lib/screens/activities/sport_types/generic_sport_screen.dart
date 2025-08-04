@@ -11,8 +11,6 @@ import 'package:move_young/config/sport_display_registry.dart';
 import 'package:move_young/widgets/sport_field_card.dart';
 import 'dart:async';
 
-
-
 class GenericSportScreen extends StatefulWidget {
   final String title;
   final String sportType;
@@ -27,7 +25,8 @@ class GenericSportScreen extends StatefulWidget {
   State<GenericSportScreen> createState() => _GenericSportScreenState();
 }
 
-class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticKeepAliveClientMixin{
+class _GenericSportScreenState extends State<GenericSportScreen>
+    with AutomaticKeepAliveClientMixin {
   Set<String> _favoriteIds = {}; // ✅ Favorite locations
   List<Map<String, dynamic>> _allLocations = [];
   List<Map<String, dynamic>> _filteredLocations = [];
@@ -52,7 +51,8 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
   Future<void> _loadFavorites() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _favoriteIds = prefs.getStringList('favoriteSportLocations')?.toSet() ?? {};
+      _favoriteIds =
+          prefs.getStringList('favoriteSportLocations')?.toSet() ?? {};
     });
   }
 
@@ -67,6 +67,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
       prefs.setStringList('favoriteSportLocations', _favoriteIds.toList());
     });
   }
+
   @override
   void dispose() {
     _debounce?.cancel();
@@ -77,16 +78,18 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
   Future<void> _loadData() async {
     try {
       LocationPermission permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-        setState((){
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        setState(() {
           _error = 'Location permission is required to show nearby fields.';
           _isLoading = false;
         });
         return;
       }
-      
+
       _userPosition = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.best),
+        locationSettings:
+            const LocationSettings(accuracy: LocationAccuracy.best),
       );
 
       final locations = await OverpassService.fetchFields(
@@ -98,8 +101,8 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
         final lat = loc['lat'];
         final lon = loc['lon'];
 
-        final distance = _calculateDistance(lat,lon);
-        loc['distance'] = distance.isFinite ? distance: double.infinity;
+        final distance = _calculateDistance(lat, lon);
+        loc['distance'] = distance.isFinite ? distance : double.infinity;
 
         //Distance calc
         if (loc['name'] != null && loc['name'].toString().trim().isNotEmpty) {
@@ -109,21 +112,21 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
           if (_locationCache.containsKey(key)) {
             loc['displayName'] = _locationCache[key];
           } else {
-            final streetName = await getNearestStreetName(lat,lon);
+            final streetName = await getNearestStreetName(lat, lon);
             _locationCache[key] = streetName;
             loc['displayName'] = streetName;
           }
         }
       }
 
-      locations.sort((a, b) => (a['distance'] as double).compareTo(b['distance'] as double));
+      locations.sort((a, b) =>
+          (a['distance'] as double).compareTo(b['distance'] as double));
 
       setState(() {
         _allLocations = locations;
         _applyFilters();
         _isLoading = false;
       });
-    
     } catch (e) {
       setState(() {
         _error = 'Something went wrong while loading data';
@@ -146,12 +149,11 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
 
       final tags = field['tags'] ?? {};
 
-      if (_selectedSurface != null &&
-          tags['surface'] != _selectedSurface) {
+      if (_selectedSurface != null && tags['surface'] != _selectedSurface) {
         return false;
       }
 
-      if(_onlyLit && tags['lit'] != 'yes') {
+      if (_onlyLit && tags['lit'] != 'yes') {
         return false;
       }
 
@@ -160,7 +162,9 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
   }
 
   double _calculateDistance(double? lat, double? lon) {
-    if (_userPosition == null || lat == null || lon == null) return double.infinity;
+    if (_userPosition == null || lat == null || lon == null) {
+      return double.infinity;
+    }
     return Geolocator.distanceBetween(
       _userPosition!.latitude,
       _userPosition!.longitude,
@@ -170,7 +174,8 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
   }
 
   void _openDirections(String lat, String lon) async {
-    final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
+    final url =
+        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lon&travelmode=walking';
     final uri = Uri.parse(url);
 
     if (await canLaunchUrl(uri)) {
@@ -188,7 +193,6 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
     await Share.share(message);
   }
 
-  
   String _formatDistance(double distance) {
     if (distance == double.infinity) return 'Distance unknown';
     return distance < 1000
@@ -229,18 +233,18 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
       IconData iconData;
       Color color;
 
-
-      if (key == 'lit'){
-        iconData = (rawValue =='yes') ? Icons.lightbulb: Icons.lightbulb_outline;
+      if (key == 'lit') {
+        iconData =
+            (rawValue == 'yes') ? Icons.lightbulb : Icons.lightbulb_outline;
         color = Colors.amber;
       } else {
         iconData = (iconMap[key] != null && iconMap[key]!.isNotEmpty)
-          ? iconMap[key]![0] as IconData
-          : Icons.info_outline;
-        
-      color = (iconMap[key] != null && iconMap[key]!.length > 1)
-        ? iconMap[key]![1] as Color
-        : Colors.grey;
+            ? iconMap[key]![0] as IconData
+            : Icons.info_outline;
+
+        color = (iconMap[key] != null && iconMap[key]!.length > 1)
+            ? iconMap[key]![1] as Color
+            : Colors.grey;
       }
 
       characteristics.add(Row(
@@ -248,7 +252,8 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
         children: [
           Icon(iconData, size: 16, color: color),
           const SizedBox(width: 4),
-          Text(value, style: const TextStyle(fontSize: 16, color: Colors.black87)),
+          Text(value,
+              style: const TextStyle(fontSize: 16, color: Colors.black87)),
           const SizedBox(width: 12),
         ],
       ));
@@ -261,14 +266,18 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
         runSpacing: 4,
         children: characteristics.isNotEmpty
             ? characteristics
-            : [Text('No characteristics available', style: TextStyle(color: Colors.grey[600]))],
+            : [
+                Text('No characteristics available',
+                    style: TextStyle(color: Colors.grey[600]))
+              ],
       ),
     );
   }
 
   Widget _buildFilterChips() {
     final keys = SportCharacteristics.get(widget.sportType);
-    final surfaceOptions = SportCharacteristics.getValues(widget.sportType,'surface');
+    final surfaceOptions =
+        SportCharacteristics.getValues(widget.sportType, 'surface');
     final hasSurface = keys.contains('surface');
     final hasLit = keys.contains('lit');
 
@@ -277,9 +286,10 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          if(hasSurface)
+          if (hasSurface)
             ...surfaceOptions.map((surface) {
-              final label = SportCharacteristics.getLabel(surface,SportCharacteristics.surfaceLabels);
+              final label = SportCharacteristics.getLabel(
+                  surface, SportCharacteristics.surfaceLabels);
               final isSelected = _selectedSurface == surface;
               return Padding(
                 padding: const EdgeInsets.only(right: 8.0),
@@ -291,27 +301,26 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
                       _selectedSurface = selected ? surface : null;
                       _applyFilters();
                     });
-                  },  
+                  },
                 ),
               );
             }),
-
           if (hasLit)
-             Padding(
-               padding:const EdgeInsets.only(right: 8),
-               child: FilterChip(
-                 label: const Text('Lit'),
-                 selected: _onlyLit,
-                 selectedColor: Colors.amber[200],
-                 backgroundColor: Colors.grey[200],
-                 showCheckmark: false,
-                 avatar: Icon(
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: const Text('Lit'),
+                selected: _onlyLit,
+                selectedColor: Colors.amber[200],
+                backgroundColor: Colors.grey[200],
+                showCheckmark: false,
+                avatar: Icon(
                   _onlyLit ? Icons.lightbulb : Icons.lightbulb_outline,
                   color: _onlyLit ? Colors.amber[600] : Colors.grey,
                   size: 18,
-                 ),
-                 onSelected: (selected) {
-                   setState(() {
+                ),
+                onSelected: (selected) {
+                  setState(() {
                     _onlyLit = selected;
                     _applyFilters();
                   });
@@ -321,7 +330,7 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
         ],
       ),
     );
-  }      
+  }
 
   @override
   bool get wantKeepAlive => true;
@@ -349,133 +358,146 @@ class _GenericSportScreenState extends State<GenericSportScreen> with AutomaticK
               : RefreshIndicator(
                   onRefresh: _loadData,
                   child: CustomScrollView(
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: const Padding(  
-                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: Text(
-                          'Find location for your exercise',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w300,
-                            fontFamily: 'Poppins',
-                            color: Colors.black,
-                            height: 1.4,
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 8.0),
+                          child: Text(
+                            'Find location for your exercise',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w300,
+                              fontFamily: 'Poppins',
+                              color: Colors.black,
+                              height: 1.4,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SliverPersistentHeader(
-                      pinned: true,
-                      delegate: _StickyHeaderDelegate(
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _searchController,
-                                      decoration: InputDecoration(
-                                        hintText: 'Search by name or address...',
-                                        filled: true,
-                                        fillColor: Colors.grey[200],
-                                        prefixIcon: const Icon(Icons.search),
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                          borderSide: BorderSide.none,
+                      SliverPersistentHeader(
+                        pinned: true,
+                        delegate: _StickyHeaderDelegate(
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _searchController,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              'Search by name or address...',
+                                          filled: true,
+                                          fillColor: Colors.grey[200],
+                                          prefixIcon: const Icon(Icons.search),
+                                          border: OutlineInputBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            borderSide: BorderSide.none,
+                                          ),
                                         ),
-                                      ),
-                                      onChanged: (value) {
-                                        if (_debounce?.isActive ?? false) _debounce!.cancel();
-                                        _debounce = Timer(const Duration(milliseconds: 300), () {  
-                                          setState(() {
-                                            _searchQuery = value;
-                                            _applyFilters();
+                                        onChanged: (value) {
+                                          if (_debounce?.isActive ?? false) {
+                                            _debounce!.cancel();
+                                          }
+                                          _debounce = Timer(
+                                              const Duration(milliseconds: 300),
+                                              () {
+                                            setState(() {
+                                              _searchQuery = value;
+                                              _applyFilters();
+                                            });
                                           });
-                                        });
-                                      },
-                                    ),
-                                  ),    
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => GenericMapScreen(
-                                          title: widget.title,
-                                          locations: _filteredLocations,
-                                        ),
+                                        },
                                       ),
-                                    );
-                                  },
-                                  child: Row(
-                                    children: const [
-                                      Icon(Icons.map, color: Colors.black),
-                                      SizedBox(width: 4),
-                                      Text('Show in map', style: TextStyle(color: Colors.black)),
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => GenericMapScreen(
+                                              title: widget.title,
+                                              locations: _filteredLocations,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Row(
+                                        children: const [
+                                          Icon(Icons.map, color: Colors.black),
+                                          SizedBox(width: 4),
+                                          Text('Show in map',
+                                              style: TextStyle(
+                                                  color: Colors.black)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 8),
+                              _buildFilterChips(),
+                            ],
                           ),
-                          const SizedBox(height: 8),
-                          _buildFilterChips(),
-                        ],
+                        ),
                       ),
-                    ),
-                    ),
-                    _filteredLocations.isEmpty
-                        ? SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Center(
-                                child: Text(
-                                  'No fields found.\nTry changing filters or search.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 16,
-                                    fontFamily: 'Poppins',
+                      _filteredLocations.isEmpty
+                          ? SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Center(
+                                  child: Text(
+                                    'No fields found.\nTry changing filters or search.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 16,
+                                      fontFamily: 'Poppins',
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          )
-                        : SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                final field = _filteredLocations[index];
-                                final lat = field['lat'].toString();
-                                final lon = field['lon'].toString();
-                                final distance = field['distance'] as double;
+                            )
+                          : SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (context, index) {
+                                  final field = _filteredLocations[index];
+                                  final lat = field['lat'].toString();
+                                  final lon = field['lon'].toString();
+                                  final distance = field['distance'] as double;
 
-                                return SportFieldCard(
-                                  field: field,
-                                  isFavorite: _favoriteIds.contains('$lat,$lon'),
-                                  distanceText: _formatDistance(distance),
-                                  getDisplayName: _getDisplayName,
-                                  characteristics: _buildCharacteristicsRow(field),
-                                  onToggleFavorite: () async {
-                                    final id = '$lat,$lon';
-                                    await _toggleFavorite(id);
-                                  },
-                                  onShare: () async {
-                                    final name = await _getDisplayName(field);
-                                    _shareLocation(name, lat, lon);
-                                  },
-                                  onDirections: () => _openDirections(lat, lon),
-                                );
-                              },
-                              childCount: _filteredLocations.length,
+                                  return SportFieldCard(
+                                    field: field,
+                                    isFavorite:
+                                        _favoriteIds.contains('$lat,$lon'),
+                                    distanceText: _formatDistance(distance),
+                                    getDisplayName: _getDisplayName,
+                                    characteristics:
+                                        _buildCharacteristicsRow(field),
+                                    onToggleFavorite: () async {
+                                      final id = '$lat,$lon';
+                                      await _toggleFavorite(id);
+                                    },
+                                    onShare: () async {
+                                      final name = await _getDisplayName(field);
+                                      _shareLocation(name, lat, lon);
+                                    },
+                                    onDirections: () =>
+                                        _openDirections(lat, lon),
+                                  );
+                                },
+                                childCount: _filteredLocations.length,
+                              ),
                             ),
-                          ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
     );
   }
 }
@@ -487,7 +509,8 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   _StickyHeaderDelegate({required this.child});
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Material(
       color: Colors.white,
       elevation: overlapsContent ? 4 : 0,
@@ -500,5 +523,6 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   double get minExtent => 120;
   @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => true;
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
+      true;
 }

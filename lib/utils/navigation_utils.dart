@@ -7,14 +7,12 @@ class NavigationUtils {
   static Future<void> shareLocation(String name, String lat, String lon) async {
     final message =
         "${'meet_me'.tr()} $name! 📍 https://maps.google.com/?q=$lat,$lon";
-    final result = await SharePlus.instance.share(
-      ShareParams(text: message),
-    );
 
-    if (result.status == ShareResultStatus.success) {
+    try {
+      await Share.share(message);
       debugPrint('user_shared_location'.tr());
-    } else {
-      debugPrint("user_dismissed_sharing".tr());
+    } catch (e) {
+      debugPrint('user_dismissed_sharing'.tr());
     }
   }
 
