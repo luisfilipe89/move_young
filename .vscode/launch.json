@@ -7,14 +7,13 @@
       "type": "dart",
       "deviceId": "RF8N31RNCLX",
       "flutterMode": "debug",
-      "program": "lib/main.dart",
-      "preLaunchTask": "flutter prepare"
+      "program": "lib/main.dart"
     },
     {
       "name": "Flutter: Launch Chrome",
       "request": "launch",
       "type": "dart",
-      "deviceId": "chrome",
+      "deviceId": "chrome"
     }
   ]
 }

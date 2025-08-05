@@ -46,8 +46,12 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
+          TextButton.icon(
             icon: const Icon(Icons.language, color: Colors.black),
+            label: Text(
+              context.locale.languageCode.toUpperCase(),
+              style: const TextStyle(fontSize: 14, fontFamily: 'Poppins'),
+            ),
             onPressed: () {
               final currentLocale = context.locale;
               context.setLocale(
@@ -56,6 +60,7 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                     : const Locale('nl'),
               );
             },
+            style: TextButton.styleFrom(foregroundColor: Colors.black),
           ),
           IconButton(
             icon: const Icon(Icons.qr_code, color: Colors.black),
@@ -85,7 +90,7 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Hello Luís!".tr(),
+                  "hello".tr(),
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w300,
@@ -136,7 +141,7 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "check_fields".tr(),
+                                "check_for_fields".tr(),
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -145,7 +150,7 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                               ),
                               SizedBox(height: 1),
                               Text(
-                                "look_fields".tr(),
+                                "look_for_fields".tr(),
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.black54,
@@ -192,7 +197,7 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              "join_event".tr(),
+                              "join_sports_event".tr(),
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.black54,

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:move_young/widgets/activity_card.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ActivityCategoryPage extends StatefulWidget {
   final List<Map<String, String>> activities;
@@ -32,7 +33,7 @@ class _ActivityCategoryPageState extends State<ActivityCategoryPage>
       itemBuilder: (context, index) {
         final activity = widget.activities[index];
         return ActivityCard(
-          title: activity['title']!,
+          title: activity['title']!.tr(),
           imageUrl: activity['image']!,
           calories: activity['calories']!,
           onTap: () => widget.onTapActivity(activity['title']!),

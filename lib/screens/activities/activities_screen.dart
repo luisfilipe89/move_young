@@ -30,7 +30,13 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     super.dispose();
   }
 
-  final List<String> categories = ['Grouped', 'Not so Grouped', 'Radical'];
+  final List<String> categories = ['grouped', 'not_so_grouped', 'radical'];
+
+  final Map<String, String> categoryKeys = {
+    'grouped': 'grouped',
+    'not_so_grouped': 'not_so_grouped',
+    'radical': 'radical',
+  };
 
   final Map<String, List<Map<String, String>>> activities = {
     'grouped': [
@@ -62,7 +68,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         'calories': '450Kcal/hr',
       },
       {
-        'title': 'fitness_station',
+        'title': 'fitness_stations',
         'image': 'assets/images/fitness_station.jpg',
         'calories': '300Kcal/hr',
       },
@@ -200,7 +206,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                                 child: Column(
                                   children: [
                                     Text(
-                                      categories[index],
+                                      categories[index].tr(),
                                       style: TextStyle(
                                         fontSize: 14.5,
                                         fontFamily: 'Poppins',
@@ -234,8 +240,9 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                             });
                           },
                           itemBuilder: (context, pageIndex) {
-                            final pageActivities =
-                                activities[categories[pageIndex]]!;
+                            final key = categoryKeys[categories[pageIndex]];
+                            final pageActivities = activities[key] ?? [];
+
                             return ActivityCategoryPage(
                               activities: pageActivities,
                               onTapActivity: navigateToMenu,

@@ -1,6 +1,7 @@
 import 'package:move_young/screens/activities/sport_types/football_fields.dart';
 import 'package:move_young/screens/activities/sport_types/basketball_courts.dart';
 import 'package:move_young/screens/activities/sport_types/table_tennis.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SportDisplayRegistry {
   static final Map<String, Map<String, List<dynamic>>> _iconMapRegistry = {
@@ -9,7 +10,8 @@ class SportDisplayRegistry {
     'table_tennis': TableTennisDisplay.tagIcons,
   };
 
-  static final Map<String, String Function(String, String?)> _formatterRegistry = {
+  static final Map<String, String Function(String, String?)>
+      _formatterRegistry = {
     'soccer': FootballFieldDisplay.formatValue,
     'basketball': BasketballFieldDisplay.formatValue,
     'table_tennis': TableTennisDisplay.formatValue,
@@ -20,6 +22,7 @@ class SportDisplayRegistry {
   }
 
   static String Function(String, String?) getFormatter(String sportType) {
-    return _formatterRegistry[sportType] ?? (key, value) => value ?? 'Unknown';
+    return _formatterRegistry[sportType] ??
+        (key, value) => (value ?? 'unknown').tr();
   }
 }

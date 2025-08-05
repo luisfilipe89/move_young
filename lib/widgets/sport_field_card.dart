@@ -26,8 +26,6 @@ class SportFieldCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lat = field['lat'].toString();
-    final lon = field['lon'].toString();
     final imageUrl = field['tags']?['image'];
 
     return Padding(

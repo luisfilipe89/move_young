@@ -10,6 +10,7 @@ import 'package:move_young/config/sport_characteristics.dart';
 import 'package:move_young/config/sport_display_registry.dart';
 import 'package:move_young/widgets/sport_field_card.dart';
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 
 class GenericSportScreen extends StatefulWidget {
   final String title;
@@ -81,7 +82,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
         setState(() {
-          _error = 'Location permission is required to show nearby fields.';
+          _error = 'location_permission_required'.tr();
           _isLoading = false;
         });
         return;
@@ -129,7 +130,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
       });
     } catch (e) {
       setState(() {
-        _error = 'Something went wrong while loading data';
+        _error = 'loading_error'.tr();
         _isLoading = false;
       });
       debugPrint('Error in _loadData: $e');
@@ -183,7 +184,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open Google Maps')),
+        SnackBar(content: Text('could_not_open_maps'.tr())),
       );
     }
   }
@@ -194,7 +195,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
   }
 
   String _formatDistance(double distance) {
-    if (distance == double.infinity) return 'Distance unknown';
+    if (distance == double.infinity) return 'distance_unknown'.tr();
     return distance < 1000
         ? '${distance.toStringAsFixed(0)} m away'
         : '${(distance / 1000).toStringAsFixed(1)} km away';
@@ -228,7 +229,16 @@ class _GenericSportScreenState extends State<GenericSportScreen>
 
     for (var key in keys) {
       final rawValue = tags[key];
-      final value = formatValue(key, rawValue);
+
+      String value;
+
+      if (key == 'lit') {
+        value = (rawValue == 'yes')
+            ? 'lit'.tr() // maps to Verlicht
+            : 'not_lit'.tr(); // maps to Niet verlicht
+      } else {
+        value = formatValue(key, rawValue);
+      }
 
       IconData iconData;
       Color color;
@@ -267,7 +277,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
         children: characteristics.isNotEmpty
             ? characteristics
             : [
-                Text('No characteristics available',
+                Text('no_characteristics_available'.tr(),
                     style: TextStyle(color: Colors.grey[600]))
               ],
       ),
@@ -288,9 +298,12 @@ class _GenericSportScreenState extends State<GenericSportScreen>
         children: [
           if (hasSurface)
             ...surfaceOptions.map((surface) {
-              final label = SportCharacteristics.getLabel(
-                  surface, SportCharacteristics.surfaceLabels);
+              final labelKey =
+                  SportCharacteristics.surfaceLabels[surface] ?? 'unknown';
+              final label = labelKey.tr(); // 👈 apply tr() *here*
               final isSelected = _selectedSurface == surface;
+              print(
+                  '❌surface = $surface, labelKey = $labelKey, label = $label');
               return Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: FilterChip(
@@ -309,7 +322,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilterChip(
-                label: const Text('Lit'),
+                label: Text('lit'.tr()),
                 selected: _onlyLit,
                 selectedColor: Colors.amber[200],
                 backgroundColor: Colors.grey[200],
@@ -360,11 +373,11 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                   child: CustomScrollView(
                     slivers: [
                       SliverToBoxAdapter(
-                        child: const Padding(
+                        child: Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 8.0),
                           child: Text(
-                            'Find location for your exercise',
+                            'find_location_exercise'.tr(),
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w300,
@@ -390,7 +403,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                                         controller: _searchController,
                                         decoration: InputDecoration(
                                           hintText:
-                                              'Search by name or address...',
+                                              'search_by_name_address'.tr(),
                                           filled: true,
                                           fillColor: Colors.grey[200],
                                           prefixIcon: const Icon(Icons.search),
@@ -429,10 +442,10 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                                         );
                                       },
                                       child: Row(
-                                        children: const [
+                                        children: [
                                           Icon(Icons.map, color: Colors.black),
                                           SizedBox(width: 4),
-                                          Text('Show in map',
+                                          Text('show_in_map'.tr(),
                                               style: TextStyle(
                                                   color: Colors.black)),
                                         ],
@@ -453,7 +466,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                                 padding: const EdgeInsets.all(24),
                                 child: Center(
                                   child: Text(
-                                    'No fields found.\nTry changing filters or search.',
+                                    'no_fields_found'.tr(),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.grey[600],

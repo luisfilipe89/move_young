@@ -1,4 +1,3 @@
-import 'package:move_young/utils/string_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class SportCharacteristics {
@@ -36,6 +35,11 @@ class SportCharacteristics {
     'wood': 'wood',
   };
 
+  static const Map<String, String> litLabels = {
+    'yes': 'lit',
+    'no': 'not_lit',
+  };
+
   static List<String> get(String sportType) {
     return registry[sportType] ?? [];
   }
@@ -45,7 +49,7 @@ class SportCharacteristics {
   }
 
   static String getLabel(String key, Map<String, String> labels) {
-    final translationKey = labels[key] ?? key;
+    final translationKey = labels[key] ?? 'unknown';
     return translationKey.tr();
   }
 }

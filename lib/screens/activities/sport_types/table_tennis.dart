@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:move_young/screens/activities/sport_types/generic_sport_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class TableTennisScreen extends StatelessWidget {
   const TableTennisScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const GenericSportScreen(
-      title: 'Table Tennis',
+    return GenericSportScreen(
+      title: 'table_tennis_areas'.tr(),
       sportType: 'table_tennis',
     );
   }
