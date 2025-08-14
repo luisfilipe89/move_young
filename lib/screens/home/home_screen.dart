@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:move_young/screens/activities/activities_screen.dart';
 import 'package:move_young/models/event_model.dart';
 import 'package:move_young/services/load_events_from_json.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -102,11 +101,7 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                 // Tile to go to Activities Screen
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ActivitiesScreen()),
-                    );
+                    Navigator.of(context).pushNamed('/activities');
                   },
                   child: Container(
                     decoration: BoxDecoration(

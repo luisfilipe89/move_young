@@ -187,7 +187,7 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
                       left: 8,
                       bottom: 28, // slightly above Google logo
                       child: Container(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 2),
                         child: const Text(
