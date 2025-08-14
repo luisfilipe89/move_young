@@ -27,6 +27,7 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
   GoogleMapController? _mapController;
   Position? _userPosition;
   String? _locationError;
+  String? _selectedMarkerId;
   final Set<Marker> _markers = {};
 
   @override
@@ -77,7 +78,7 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
     _mapController!.animateCamera(CameraUpdate.newLatLngBounds(bounds, 80));
   }
 
-  void _setLocationMarkers() {
+  void _setLocationMarkers({bool fitBounds = true}) {
     final markers = <Marker>{};
     final positions = <LatLng>[];
 
@@ -90,20 +91,28 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
       positions.add(position);
 
       final lit = loc['lit'] == 'yes' || loc['lit'] == true;
+      final markerId = '$parsedLat-$parsedLon';
+      final isSelected = markerId == _selectedMarkerId;
 
       final markerColor = BitmapDescriptor.defaultMarkerWithHue(
-        lit ? BitmapDescriptor.hueYellow : BitmapDescriptor.hueRed,
+        isSelected
+            ? BitmapDescriptor.hueGreen
+            : lit
+                ? BitmapDescriptor.hueYellow
+                : BitmapDescriptor.hueRed,
       );
 
       markers.add(
         Marker(
-          markerId: MarkerId('$parsedLat-$parsedLon'),
+          markerId: MarkerId(markerId),
           position: position,
           icon: markerColor,
           onTap: () {
             setState(() {
               _selectedLocation = loc;
+              _selectedMarkerId = markerId;
             });
+            _setLocationMarkers(fitBounds: false);
             _mapController?.animateCamera(
               CameraUpdate.newLatLng(position),
             );
@@ -133,9 +142,11 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
       _markers.addAll(markers);
     });
 
-    Future.delayed(const Duration(milliseconds: 200), () {
-      _fitMapToBounds(positions);
-    });
+    if (fitBounds) {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        _fitMapToBounds(positions);
+      });
+    }
   }
 
   @override
@@ -152,23 +163,40 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
             )
           : _userPosition == null
               ? const Center(child: CircularProgressIndicator())
-              : GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(
-                      _userPosition!.latitude,
-                      _userPosition!.longitude,
+              : Stack(
+                  children: [
+                    GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: LatLng(
+                          _userPosition!.latitude,
+                          _userPosition!.longitude,
+                        ),
+                        zoom: _defaultZoom,
+                      ),
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: true,
+                      markers: _markers,
+                      onMapCreated: (controller) => _mapController = controller,
+                      onTap: (_) {
+                        setState(() {
+                          _selectedLocation = null;
+                        });
+                      },
                     ),
-                    zoom: _defaultZoom,
-                  ),
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: true,
-                  markers: _markers,
-                  onMapCreated: (controller) => _mapController = controller,
-                  onTap: (_) {
-                    setState(() {
-                      _selectedLocation = null;
-                    });
-                  },
+                    Positioned(
+                      left: 8,
+                      bottom: 28, // slightly above Google logo
+                      child: Container(
+                        color: Colors.white.withOpacity(0.7),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        child: const Text(
+                          '© OpenStreetMap contributors (ODbL)',
+                          style: TextStyle(fontSize: 10, color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
       bottomSheet: _selectedLocation == null
           ? null
