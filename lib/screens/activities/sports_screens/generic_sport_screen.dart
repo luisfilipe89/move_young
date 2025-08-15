@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:move_young/services/overpass_service.dart';
 import 'package:move_young/screens/maps/gmaps_screen.dart';
 import 'package:move_young/utils/reverse_geocoding.dart';
-import 'package:move_young/config/sport_characteristics.dart';
+import 'package:move_young/config/sport_characteristics_registry.dart';
 import 'package:move_young/config/sport_display_registry.dart';
 import 'package:move_young/widgets/sport_field_card.dart';
 import 'dart:async';
@@ -222,47 +222,29 @@ class _GenericSportScreenState extends State<GenericSportScreen>
   Widget _buildCharacteristicsRow(Map<String, dynamic> field) {
     final tags = field['tags'] ?? {};
     final keys = SportCharacteristics.get(widget.sportType);
-    final iconMap = SportDisplayRegistry.getIconMap(widget.sportType);
-    final formatValue = SportDisplayRegistry.getFormatter(widget.sportType);
 
     final List<Widget> characteristics = [];
 
-    for (var key in keys) {
-      final rawValue = tags[key];
+    for (final key in keys) {
+      final rawValue = tags[key]?.toString();
+      final label = SportCharacteristics.labelFor(key, rawValue);
 
-      String value;
-
-      if (key == 'lit') {
-        value = (rawValue == 'yes')
-            ? 'lit'.tr() // maps to Verlicht
-            : 'not_lit'.tr(); // maps to Niet verlicht
-      } else {
-        value = formatValue(key, rawValue);
-      }
-
-      IconData iconData;
-      Color color;
-
-      if (key == 'lit') {
-        iconData =
-            (rawValue == 'yes') ? Icons.lightbulb : Icons.lightbulb_outline;
-        color = Colors.amber;
-      } else {
-        iconData = (iconMap[key] != null && iconMap[key]!.isNotEmpty)
-            ? iconMap[key]![0] as IconData
-            : Icons.info_outline;
-
-        color = (iconMap[key] != null && iconMap[key]!.length > 1)
-            ? iconMap[key]![1] as Color
-            : Colors.grey;
-      }
+      final iconMap = SportDisplayRegistry.getIconMap(widget.sportType);
+      final entry = iconMap[key];
+      final iconData =
+          (entry != null && entry.isNotEmpty && entry[0] is IconData)
+              ? entry[0] as IconData
+              : Icons.info_outline;
+      final color = (entry != null && entry.length > 1 && entry[1] is Color)
+          ? entry[1] as Color
+          : Colors.grey;
 
       characteristics.add(Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(iconData, size: 16, color: color),
           const SizedBox(width: 4),
-          Text(value,
+          Text(label,
               style: const TextStyle(fontSize: 16, color: Colors.black87)),
           const SizedBox(width: 12),
         ],

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:move_young/screens/activities/sport_types/basketball_courts.dart';
-import 'package:move_young/screens/activities/sport_types/football_fields.dart';
-import 'package:move_young/screens/activities/sport_types/fitness_stations.dart';
-import 'package:move_young/screens/activities/sport_types/table_tennis.dart';
-import 'package:move_young/screens/activities/sport_types/skateboarding.dart';
+import 'package:move_young/screens/activities/sports_screens/soccer.dart';
+import 'package:move_young/screens/activities/sports_screens/basketball.dart';
+import 'package:move_young/screens/activities/sports_screens/tennis.dart';
+import 'package:move_young/screens/activities/sports_screens/beachvolleyball.dart';
+import 'package:move_young/screens/activities/sports_screens/table_tennis.dart';
+import 'package:move_young/screens/activities/sports_screens/fitness.dart';
+import 'package:move_young/screens/activities/sports_screens/skateboard.dart';
+import 'package:move_young/screens/activities/sports_screens/bmx.dart';
 import 'package:move_young/widgets/activity_category_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -41,7 +44,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
   final Map<String, List<Map<String, String>>> activities = {
     'grouped': [
       {
-        'title': 'football',
+        'title': 'soccer',
         'image': 'assets/images/soccer.webp',
         'calories': '420Kcal/hr',
       },
@@ -56,6 +59,11 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         'calories': '400Kcal/hr',
       },
       {
+        'title': 'beachvolleyball',
+        'image': 'assets/images/bvb.webp',
+        'calories': '250Kcal/hr',
+      },
+      {
         'title': 'table_tennis',
         'image': 'assets/images/tennis.webp',
         'calories': '250Kcal/hr',
@@ -63,20 +71,20 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     ],
     'not_so_grouped': [
       {
-        'title': 'swimming',
-        'image': 'assets/images/swimming.webp',
-        'calories': '450Kcal/hr',
-      },
-      {
-        'title': 'fitness_stations',
+        'title': 'fitness',
         'image': 'assets/images/fitness_station.jpg',
         'calories': '300Kcal/hr',
       },
     ],
     'radical': [
       {
-        'title': 'skateboarding',
-        'image': 'assets/images/skateboarding.webp',
+        'title': 'skateboard',
+        'image': 'assets/images/skateboarding2.webp',
+        'calories': '350Kcal/hr',
+      },
+      {
+        'title': 'bmx',
+        'image': 'assets/images/bmx.webp',
         'calories': '350Kcal/hr',
       },
     ],
@@ -86,22 +94,37 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     Widget? screen;
 
     switch (title.toLowerCase()) {
-      case 'football':
-        screen = const FootballFieldScreen();
+      //Grouped
+      case 'soccer':
+        screen = const SoccerScreen();
         break;
       case 'basketball':
-        screen = const BasketballCourtsScreen();
+        screen = const BasketballScreen();
         break;
-      case 'fitness station':
-        screen = const FitnessStationsScreen();
+      case 'tennis':
+        screen = const TennisScreen();
         break;
-      case 'table tennis':
+      case 'beachvolleyball':
+        screen = const BeachVolleyBallScreen();
+        break;
+      case 'table_tennis':
         screen = const TableTennisScreen();
         break;
-      case 'skateboarding':
-        screen = const SkateboardingScreen();
+
+      //Not so grouped
+      case 'fitness':
+        screen = const FitnessScreen();
+        break;
+
+      //Radical
+      case 'skateboard':
+        screen = const SkateboardScreen();
+        break;
+      case 'BMX':
+        screen = const BmxScreen();
         break;
     }
+
     if (screen != null) {
       Navigator.push(
         context,
