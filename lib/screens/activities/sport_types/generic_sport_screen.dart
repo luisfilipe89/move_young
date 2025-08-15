@@ -300,10 +300,9 @@ class _GenericSportScreenState extends State<GenericSportScreen>
             ...surfaceOptions.map((surface) {
               final labelKey =
                   SportCharacteristics.surfaceLabels[surface] ?? 'unknown';
-              final label = labelKey.tr(); // 👈 apply tr() *here*
+              final label = labelKey.tr();
               final isSelected = _selectedSurface == surface;
-              print(
-                  '❌surface = $surface, labelKey = $labelKey, label = $label');
+
               return Padding(
                 padding: const EdgeInsets.only(right: 8.0),
                 child: FilterChip(
@@ -388,6 +387,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                           ),
                         ),
                       ),
+                      //Pinned: search + filters
                       SliverPersistentHeader(
                         pinned: true,
                         delegate: _StickyHeaderDelegate(
@@ -515,7 +515,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
   }
 }
 
-//Sticky Header Class
+//Sticky header delegate
 class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
 

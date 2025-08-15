@@ -48,13 +48,13 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
           TextButton.icon(
             icon: const Icon(Icons.language, color: Colors.black),
             label: Text(
-              context.locale.languageCode.toUpperCase(),
+              context.locale.languageCode == 'nl' ? 'EN' : 'NL',
               style: const TextStyle(fontSize: 14, fontFamily: 'Poppins'),
             ),
             onPressed: () {
-              final currentLocale = context.locale;
+              final curr = context.locale;
               context.setLocale(
-                currentLocale.languageCode == 'nl'
+                curr.languageCode == 'nl'
                     ? const Locale('en')
                     : const Locale('nl'),
               );

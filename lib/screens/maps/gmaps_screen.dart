@@ -3,7 +3,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:move_young/utils/string_extensions.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class GenericMapScreen extends StatefulWidget {
@@ -29,6 +28,14 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
   String? _locationError;
   String? _selectedMarkerId;
   final Set<Marker> _markers = {};
+
+  //Local helper for capitalization
+  String _titleCase(String s) {
+    return s
+        .split(' ')
+        .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
+        .join(' ');
+  }
 
   @override
   void initState() {
@@ -131,7 +138,7 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
           icon: BitmapDescriptor.defaultMarkerWithHue(
             BitmapDescriptor.hueAzure,
           ),
-          infoWindow: const InfoWindow(title: 'You'),
+          infoWindow: InfoWindow(title: 'you'.tr()),
         ),
       );
       positions.add(userLatLng);
@@ -217,17 +224,27 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
                         '📍 ${_selectedLocation!['name'] ?? 'unnamed_location'.tr()}',
                         style: const TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        '${_selectedLocation!['surface']?.toString().replaceAll('_', ' ').capitalize() ?? 'Unknown'}'
-                        '${_selectedLocation!['lit'] == 'yes' ? '\n💡 Lit' : ''}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
+                      Builder(
+                        builder: (context) {
+                          final rawSurface =
+                              (_selectedLocation?['surface'] ?? '').toString();
+                          final surfaceLabel = rawSurface.isNotEmpty
+                              ? _titleCase(rawSurface.replaceAll('_', ' '))
+                              : 'unknown'.tr();
+
+                          final litLabel = _selectedLocation?['lit'] == 'yes'
+                              ? '\n💡 ${'lit'.tr()}'
+                              : '';
+
+                          return Text(
+                            '$surfaceLabel$litLabel',
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.black87),
+                          );
+                        },
                       ),
                       const SizedBox(height: 12),
                       const Divider(height: 24),
@@ -260,7 +277,7 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
                                   'check_location'.tr(args: [gmapsLink]));
                             },
                             icon: const Icon(Icons.share),
-                            label: const Text("Share"),
+                            label: Text("share_location".tr()),
                           ),
                         ],
                       ),

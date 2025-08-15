@@ -18,7 +18,7 @@ class AgendaScreen extends StatefulWidget {
 }
 
 class _AgendaScreenState extends State<AgendaScreen> {
-  Set<String> _favoriteTitles = {}; // ✅ Favorite locations
+  Set<String> _favoriteTitles = {};
   final TextEditingController _searchController = TextEditingController();
   List<Event> allEvents = [];
   List<Event> filteredEvents = [];
@@ -55,20 +55,14 @@ class _AgendaScreenState extends State<AgendaScreen> {
   }
 
   Future<void> _shareEvent(Event event) async {
-    final String text;
-
-    if (event.url?.isNotEmpty ?? false) {
-      text = '${event.title}\n${event.url!}';
-    } else {
-      text = event.title;
-    }
-
+    final String text = (event.url?.isNotEmpty ?? false)
+        ? '${event.title}\n${event.url!}'
+        : event.title;
     await Share.share(text);
   }
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-
     _debounce = Timer(const Duration(milliseconds: 300), () {
       setState(() {
         _searchQuery = query;
@@ -85,7 +79,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
-      // ✅ Safe usage after async: defer with post-frame callback
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -98,7 +91,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   Future<void> loadEvents() async {
     final loaded = await loadEventsFromJson();
-
     if (!mounted) return;
 
     setState(() {
@@ -106,7 +98,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
       _applyFilters();
     });
 
-    // Preload few images from the full list
+    // Preload a few images
     for (var event in allEvents.take(5)) {
       if (event.imageUrl?.isNotEmpty ?? false) {
         precacheImage(CachedNetworkImageProvider(event.imageUrl!), context);
@@ -115,7 +107,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
   }
 
   void _applyFilters() {
-    List<Event> events = allEvents.where((event) {
+    final events = allEvents.where((event) {
       final queryMatch =
           event.title.toLowerCase().contains(_searchQuery.toLowerCase());
       final isRecurring = event.isRecurring;
@@ -127,12 +119,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
       return true;
     }).toList();
 
-    // Setstate
-    setState(() {
-      filteredEvents = events;
-    });
+    setState(() => filteredEvents = events);
 
-    //Preload only visible filtered events (first 10 max)
+    // Preload visible filtered images
     for (var event in events.take(10)) {
       if (event.imageUrl?.isNotEmpty ?? false) {
         precacheImage(CachedNetworkImageProvider(event.imageUrl!), context);
@@ -141,30 +130,51 @@ class _AgendaScreenState extends State<AgendaScreen> {
   }
 
   Widget _buildFilterChipsRow() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Wrap(
-        spacing: 12,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
         children: [
-          FilterChip(
-            label: Text('recurring').tr(),
-            selected: _showRecurring,
-            onSelected: (selected) {
-              setState(() {
-                _showRecurring = selected;
-                _applyFilters();
-              });
-            },
+          // Recurring
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: FilterChip(
+              label: Text('recurring'.tr()),
+              selected: _showRecurring,
+              showCheckmark: false,
+              avatar: Icon(
+                _showRecurring ? Icons.repeat : Icons.repeat_on_outlined,
+                color: _showRecurring ? Colors.amber[600] : Colors.grey,
+                size: 18,
+              ),
+              onSelected: (selected) {
+                setState(() {
+                  _showRecurring = selected;
+                  _applyFilters();
+                });
+              },
+            ),
           ),
-          FilterChip(
-            label: Text('one_time'.tr()),
-            selected: _showOneTime,
-            onSelected: (selected) {
-              setState(() {
-                _showOneTime = selected;
-                _applyFilters();
-              });
-            },
+
+          // One-time
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: FilterChip(
+              label: Text('one_time'.tr()),
+              selected: _showOneTime,
+              showCheckmark: false,
+              avatar: Icon(
+                _showOneTime ? Icons.event_available : Icons.event_note,
+                color: _showOneTime ? Colors.amber[600] : Colors.grey,
+                size: 18,
+              ),
+              onSelected: (selected) {
+                setState(() {
+                  _showOneTime = selected;
+                  _applyFilters();
+                });
+              },
+            ),
           ),
         ],
       ),
@@ -179,8 +189,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
         height: kImageHeight,
         width: double.infinity,
         decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(12))),
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
       ),
     );
   }
@@ -203,7 +214,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //Event Image
           if (event.imageUrl?.isNotEmpty ?? false)
             ClipRRect(
               borderRadius: BorderRadius.circular(kImageRadius),
@@ -212,12 +222,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
                 height: kImageHeight,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                //Smooth fade in
                 fadeInDuration: kFadeDuration,
                 fadeInCurve: Curves.easeInOut,
-                //Shimmer
                 placeholder: (context, url) => _buildShimmerPlaceholder(),
-                //Shown if image fails to load
                 errorWidget: (context, url, error) => Container(
                   height: kImageHeight,
                   color: Colors.grey[300],
@@ -235,8 +242,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
               child: const Center(child: Icon(Icons.image_not_supported)),
             ),
           const SizedBox(height: 8),
-
-          //Event info
           Text(
             event.title,
             style: const TextStyle(
@@ -286,7 +291,6 @@ class _AgendaScreenState extends State<AgendaScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          // Action Buttons + Enrol
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -323,7 +327,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
                     } else if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                            content: Text('Could not open the enrolment page')),
+                          content: Text('Could not open the enrolment page'),
+                        ),
                       );
                     }
                   },
@@ -333,9 +338,12 @@ class _AgendaScreenState extends State<AgendaScreen> {
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 10),
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
             ],
@@ -359,6 +367,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
         onRefresh: loadEvents,
         child: CustomScrollView(
           slivers: [
+            // --- Centered title ---
             SliverAppBar(
               pinned: true,
               floating: false,
@@ -366,40 +375,114 @@ class _AgendaScreenState extends State<AgendaScreen> {
               elevation: 0,
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,
+              centerTitle: true,
               title: Text('agenda'.tr()),
             ),
+
+            // --- Subtitle (non-pinned) ---
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'search_events'.tr(),
-                    filled: true,
-                    fillColor: Colors.grey[200],
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(kImageRadius),
-                      borderSide: BorderSide.none,
-                    ),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8.0),
+                child: Text(
+                  'find_your_next_event_for_exercise'.tr(
+                    args: const [], // add key to your locales
                   ),
-                  onChanged: _onSearchChanged,
+                  textAlign: TextAlign.left,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w300,
+                    fontFamily: 'Poppins',
+                    color: Colors.black,
+                    height: 1.4,
+                  ),
                 ),
               ),
             ),
-            SliverToBoxAdapter(child: _buildFilterChipsRow()),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final event = filteredEvents[index];
-                  return _buildEventCard(event);
-                },
-                childCount: filteredEvents.length,
+
+            // --- Pinned: search + filters
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _StickyHeaderDelegate(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'search_events'.tr(),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(kImageRadius),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        onChanged: _onSearchChanged,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildFilterChipsRow(),
+                  ],
+                ),
               ),
-            )
+            ),
+
+            // --- List ---
+            if (filteredEvents.isEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Center(
+                    child: Text(
+                      'no_events_found'.tr(), // add this key if needed
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            else
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => _buildEventCard(filteredEvents[index]),
+                  childCount: filteredEvents.length,
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+}
+
+// Sticky header delegate
+class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  _StickyHeaderDelegate({required this.child});
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Material(
+      color: Colors.white,
+      elevation: overlapsContent ? 4 : 0,
+      child: child,
+    );
+  }
+
+  // Height to fit search + chips; tweak if needed
+  @override
+  double get maxExtent => 120;
+  @override
+  double get minExtent => 120;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
+      true;
 }

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:move_young/screens/home/home_screen.dart';
 import 'package:move_young/screens/activities/activities_screen.dart';
 import 'package:move_young/screens/agenda/agenda_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
-// --- Dummy screens (replace with your real ones if you have them) ---
+// --- Dummy screens -
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
   @override
@@ -38,7 +39,6 @@ class MainScaffold extends StatefulWidget {
 class _MainScaffoldState extends State<MainScaffold> {
   int _currentIndex = 0;
 
-  // One Navigator per tab so each tab keeps its own stack/history
   final _homeKey = GlobalKey<NavigatorState>();
   final _favoritesKey = GlobalKey<NavigatorState>();
   final _agendaKey = GlobalKey<NavigatorState>();
@@ -66,22 +66,17 @@ class _MainScaffoldState extends State<MainScaffold> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      // We’ll handle back manually so predictive back can still work with nested navigators
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
-        // Try pop inside current tab
         final popped = await _currentNavigator.maybePop();
         if (popped) return;
 
-        // At root of a non-Home tab? Switch to Home.
         if (_currentIndex != 0) {
           setState(() => _currentIndex = 0);
           return;
         }
-
-        // At root of Home: allow system to pop the app (do nothing here).
       },
       child: Scaffold(
         body: IndexedStack(
@@ -97,7 +92,6 @@ class _MainScaffoldState extends State<MainScaffold> {
           currentIndex: _currentIndex,
           onTap: (index) {
             if (index == _currentIndex) {
-              // Re-tapping the same tab pops to its root.
               _popToRoot(index);
             } else {
               setState(() => _currentIndex = index);
@@ -128,7 +122,7 @@ class _HomeFlow extends StatelessWidget {
               builder: (_) => ActivitiesScreen(),
               settings: settings,
             );
-          // Add more Home subpages here (e.g., '/sportDetails')
+
           default:
             return MaterialPageRoute(
               builder: (_) => const HomeScreenNew(),
@@ -149,7 +143,6 @@ class _FavoritesFlow extends StatelessWidget {
     return Navigator(
       key: navigatorKey,
       onGenerateRoute: (settings) {
-        // Add favorites detail routes here if needed.
         return MaterialPageRoute(
           builder: (_) => const FavoritesScreen(),
           settings: settings,
@@ -168,10 +161,8 @@ class _AgendaFlow extends StatelessWidget {
     return Navigator(
       key: navigatorKey,
       onGenerateRoute: (settings) {
-        // Add '/eventDetails' later if you need deeper pages.
         return MaterialPageRoute(
-          builder: (_) =>
-              AgendaScreen(), // (no const if your constructor isn't const)
+          builder: (_) => AgendaScreen(),
           settings: settings,
         );
       },
@@ -198,8 +189,6 @@ class _WalletFlow extends StatelessWidget {
 }
 
 // ---------------------------- Bottom Bar Wrapper ----------------------------
-// Uses your CustomBottomNavBar, but wrapped in a small adapter for clarity.
-// If you already call CustomBottomNavBar directly, you can remove this widget.
 
 class _BottomBar extends StatelessWidget {
   const _BottomBar({required this.currentIndex, required this.onTap});
@@ -208,17 +197,17 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // If you prefer, replace this with your CustomBottomNavBar directly.
     return BottomNavigationBar(
+      key: ValueKey(context.locale.languageCode),
       currentIndex: currentIndex,
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorites'),
-        BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Agenda'),
+      items: [
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'.tr()),
         BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet), label: 'Wallet'),
+            icon: Icon(Icons.favorite), label: 'favorites'.tr()),
+        BottomNavigationBarItem(icon: Icon(Icons.event), label: 'agenda'.tr()),
+        BottomNavigationBarItem(icon: Icon(Icons.map), label: 'map'.tr()),
       ],
     );
   }
