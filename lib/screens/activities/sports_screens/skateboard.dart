@@ -8,7 +8,7 @@ class SkateboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GenericSportScreen(
-      title: 'skateboarding_parks'.tr(),
+      title: 'skateboard_parks'.tr(),
       sportType: 'skateboard',
     );
   }

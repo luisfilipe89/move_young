@@ -76,7 +76,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
     super.dispose();
   }
 
-  Future<void> _loadData() async {
+  Future<void> _loadData({bool bypassCache = false}) async {
     try {
       LocationPermission permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied ||
@@ -96,6 +96,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
       final locations = await OverpassService.fetchFields(
         areaName: "'s-Hertogenbosch",
         sportType: widget.sportType,
+        bypassCache: bypassCache,
       );
 
       for (var loc in locations) {
@@ -340,7 +341,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.pop(context),
         ),
         elevation: 0,
@@ -350,7 +351,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
           : _error != null
               ? Center(child: Text(_error!))
               : RefreshIndicator(
-                  onRefresh: _loadData,
+                  onRefresh: () => _loadData(bypassCache: true),
                   child: CustomScrollView(
                     slivers: [
                       SliverToBoxAdapter(

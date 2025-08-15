@@ -120,7 +120,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
       case 'skateboard':
         screen = const SkateboardScreen();
         break;
-      case 'BMX':
+      case 'bmx':
         screen = const BmxScreen();
         break;
     }
