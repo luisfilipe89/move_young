@@ -5,6 +5,7 @@ class ActivityCard extends StatelessWidget {
   final String imageUrl;
   final String calories;
   final VoidCallback onTap;
+  final Alignment imageAlignment;
 
   const ActivityCard({
     super.key,
@@ -12,6 +13,7 @@ class ActivityCard extends StatelessWidget {
     required this.imageUrl,
     required this.calories,
     required this.onTap,
+    this.imageAlignment = Alignment.center, // default
   });
 
   @override
@@ -19,7 +21,7 @@ class ActivityCard extends StatelessWidget {
     final isNetworkImage = imageUrl.startsWith('http');
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(top: 4, bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -46,13 +48,14 @@ class ActivityCard extends StatelessWidget {
                         height: 100,
                         width: double.infinity,
                         fit: BoxFit.cover,
+                        alignment: imageAlignment,
                       )
                     : Image.asset(
                         imageUrl,
-                        alignment: const Alignment(0.0, -0.5),
                         height: 100,
                         width: double.infinity,
                         fit: BoxFit.cover,
+                        alignment: imageAlignment,
                       ),
               ),
               const SizedBox(height: 8),

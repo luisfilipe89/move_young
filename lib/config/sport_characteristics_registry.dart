@@ -7,14 +7,18 @@ class SportCharacteristics {
     //Grouped
     'soccer': ['surface', 'lit'],
     'basketball': ['surface', 'lit', 'hoops'],
-    'tennis': ['surface', 'lit'], //to confirm these are free and public
+    'tennis': ['lit'], //to confirm these are free and public
     'beachvolleyball': ['surface', 'lit'],
     'table_tennis': ['indoor', 'covered'],
     //Not so grouped
+    'fitness': ['lit'],
+    'climbing': [],
+    'canoeing': [],
 
     //Radical
     'skateboard': ['surface'],
-    'fitness': ['equipment'],
+    'bmx': [],
+    'motocross': []
   };
 
   //Raw OSM values
@@ -31,13 +35,18 @@ class SportCharacteristics {
       'surface': ['sand']
     },
     'table_tennis': {},
+
     //Not so grouped
     'fitness': {},
+    'climbing': {},
+    'canoeing': {},
+
     //Radical
     'skateboard': {
       'surface': ['concrete', 'wood']
     },
     'bmx': {},
+    'motocross': {}
   };
 
   static const Map<String, String> surfaceLabels = {

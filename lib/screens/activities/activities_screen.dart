@@ -5,8 +5,11 @@ import 'package:move_young/screens/activities/sports_screens/tennis.dart';
 import 'package:move_young/screens/activities/sports_screens/beachvolleyball.dart';
 import 'package:move_young/screens/activities/sports_screens/table_tennis.dart';
 import 'package:move_young/screens/activities/sports_screens/fitness.dart';
+import 'package:move_young/screens/activities/sports_screens/climbing.dart';
 import 'package:move_young/screens/activities/sports_screens/skateboard.dart';
 import 'package:move_young/screens/activities/sports_screens/bmx.dart';
+import 'package:move_young/screens/activities/sports_screens/motocross.dart';
+
 import 'package:move_young/widgets/activity_category_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -47,21 +50,25 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         'title': 'soccer',
         'image': 'assets/images/soccer.webp',
         'calories': '420Kcal/hr',
+        'align': '0,-0.4'
       },
       {
         'title': 'basketball',
         'image': 'assets/images/basketball.jpg',
         'calories': '400Kcal/hr',
+        'align': '0,-0.4'
       },
       {
         'title': 'tennis',
         'image': 'assets/images/tennis.jpg',
         'calories': '400Kcal/hr',
+        'align': '0,-0.4'
       },
       {
         'title': 'beachvolleyball',
         'image': 'assets/images/bvb.webp',
         'calories': '250Kcal/hr',
+        'align': '0,-0.4'
       },
       {
         'title': 'table_tennis',
@@ -74,18 +81,39 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         'title': 'fitness',
         'image': 'assets/images/fitness_station.jpg',
         'calories': '300Kcal/hr',
+        'align': '0,-0.4'
       },
+      {
+        'title': 'climbing',
+        'image': 'assets/images/climbing.webp',
+        'calories': '300Kcal/hr',
+        'align': '0,-0.4'
+      },
+      {
+        'title': 'canoeing',
+        'image': 'assets/images/canoeing.webp',
+        'calories': '300Kcal/hr',
+        'align': '0,0.2'
+      }
     ],
     'radical': [
       {
         'title': 'skateboard',
         'image': 'assets/images/skateboarding2.webp',
         'calories': '350Kcal/hr',
+        'align': '0,-0.4'
       },
       {
         'title': 'bmx',
         'image': 'assets/images/bmx.webp',
         'calories': '350Kcal/hr',
+        'align': '0,-0.4'
+      },
+      {
+        'title': 'motocross',
+        'image': 'assets/images/motocross.webp',
+        'calories': '350Kcal/hr',
+        'align': '0,-0.1'
       },
     ],
   };
@@ -115,13 +143,18 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
       case 'fitness':
         screen = const FitnessScreen();
         break;
-
+      case 'climbing':
+        screen = const ClimbingScreen();
+        break;
       //Radical
       case 'skateboard':
         screen = const SkateboardScreen();
         break;
       case 'bmx':
         screen = const BmxScreen();
+        break;
+      case 'motocross':
+        screen = const MotocrossScreen();
         break;
     }
 
