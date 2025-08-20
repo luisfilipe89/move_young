@@ -8,8 +8,8 @@ class MotocrossScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GenericSportScreen(
-      title: 'canoing'.tr(),
-      sportType: 'canoe',
+      title: 'motocross_area'.tr(),
+      sportType: 'motocross',
     );
   }
 }
