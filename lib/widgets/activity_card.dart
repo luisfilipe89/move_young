@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:move_young/theme/tokens.dart';
 
 class ActivityCard extends StatelessWidget {
   final String title;
@@ -21,27 +22,20 @@ class ActivityCard extends StatelessWidget {
     final isNetworkImage = imageUrl.startsWith('http');
 
     return Container(
-      margin: const EdgeInsets.only(top: 4, bottom: 12),
+      margin: AppPaddings.topBottom,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 12,
-            offset: Offset(0, 6),
-          ),
-        ],
-      ),
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          boxShadow: AppShadows.mdBlurred),
       child: GestureDetector(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: AppPaddings.allSmall,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.image),
                 child: isNetworkImage
                     ? Image.network(
                         imageUrl,
@@ -58,32 +52,17 @@ class ActivityCard extends StatelessWidget {
                         alignment: imageAlignment,
                       ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppHeights.reg),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                    ),
-                  ),
+                  Text(title, style: AppTextStyles.cardTitle),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('🔥', style: TextStyle(fontSize: 14)),
-                      const SizedBox(width: 4),
-                      Text(
-                        calories,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      const Text('🔥', style: AppTextStyles.small),
+                      const SizedBox(width: AppWidths.small),
+                      Text(calories, style: AppTextStyles.small),
                     ],
                   ),
                 ],

@@ -11,6 +11,7 @@ import 'package:move_young/config/sport_display_registry.dart';
 import 'package:move_young/widgets/sport_field_card.dart';
 import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:move_young/theme/tokens.dart';
 
 class GenericSportScreen extends StatefulWidget {
   final String title;
@@ -220,48 +221,55 @@ class _GenericSportScreenState extends State<GenericSportScreen>
     return streetName;
   }
 
+  bool _truthy(String? v) {
+    final s = v?.toLowerCase();
+    return s == 'yes' || s == 'true' || s == '1' || s == 'y';
+  }
+
   Widget _buildCharacteristicsRow(Map<String, dynamic> field) {
-    final tags = field['tags'] ?? {};
+    final tags = field['tags'] as Map<String, dynamic>? ?? const {};
     final keys = SportCharacteristics.get(widget.sportType);
+
+    final Map<String, IconData> iconMap =
+        SportDisplayRegistry.getIconMap(widget.sportType.toLowerCase());
 
     final List<Widget> characteristics = [];
 
     for (final key in keys) {
       final rawValue = tags[key]?.toString();
-      final label = SportCharacteristics.labelFor(key, rawValue);
+      final String label = SportCharacteristics.labelFor(key, rawValue);
+      final String labelToShow = label.isEmpty ? '-' : label;
 
-      final iconMap = SportDisplayRegistry.getIconMap(widget.sportType);
-      final entry = iconMap[key];
-      final iconData =
-          (entry != null && entry.isNotEmpty && entry[0] is IconData)
-              ? entry[0] as IconData
-              : Icons.info_outline;
-      final color = (entry != null && entry.length > 1 && entry[1] is Color)
-          ? entry[1] as Color
-          : Colors.grey;
+      IconData iconData = iconMap[key] ?? Icons.info_outline;
+      Color color = AppColors.grey;
+
+      // 🔆 Special handling for 'lit'
+      if (key == 'lit') {
+        final isLit = _truthy(rawValue);
+        iconData = isLit ? Icons.lightbulb : Icons.lightbulb_outline;
+        color = isLit ? AppColors.amber : AppColors.grey;
+      }
 
       characteristics.add(Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(iconData, size: 16, color: color),
-          const SizedBox(width: 4),
-          Text(label,
-              style: const TextStyle(fontSize: 16, color: Colors.black87)),
-          const SizedBox(width: 12),
+          Icon(iconData, size: 18, color: color),
+          const SizedBox(width: 6),
+          Text(labelToShow, style: AppTextStyles.small),
         ],
       ));
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: AppPaddings.topSuperSmall,
       child: Wrap(
-        spacing: 12,
+        spacing: AppSpacing.content,
         runSpacing: 4,
         children: characteristics.isNotEmpty
             ? characteristics
             : [
                 Text('no_characteristics_available'.tr(),
-                    style: TextStyle(color: Colors.grey[600]))
+                    style: const TextStyle(color: AppColors.darkgrey)),
               ],
       ),
     );
@@ -276,7 +284,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: AppPaddings.symmHorizontalReg,
       child: Row(
         children: [
           if (hasSurface)
@@ -287,7 +295,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
               final isSelected = _selectedSurface == surface;
 
               return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+                padding: AppPaddings.rightSmall,
                 child: FilterChip(
                   label: Text(label),
                   selected: isSelected,
@@ -302,16 +310,16 @@ class _GenericSportScreenState extends State<GenericSportScreen>
             }),
           if (hasLit)
             Padding(
-              padding: const EdgeInsets.only(right: 8),
+              padding: AppPaddings.rightSmall,
               child: FilterChip(
                 label: Text('lit'.tr()),
                 selected: _onlyLit,
-                selectedColor: Colors.amber[200],
-                backgroundColor: Colors.grey[200],
+                selectedColor: AppColors.lightamber,
+                backgroundColor: AppColors.grey,
                 showCheckmark: false,
                 avatar: Icon(
                   _onlyLit ? Icons.lightbulb : Icons.lightbulb_outline,
-                  color: _onlyLit ? Colors.amber[600] : Colors.grey,
+                  color: _onlyLit ? AppColors.amber : AppColors.grey,
                   size: 18,
                 ),
                 onSelected: (selected) {
@@ -338,8 +346,8 @@ class _GenericSportScreenState extends State<GenericSportScreen>
       appBar: AppBar(
         title: Text(widget.title),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: AppColors.white,
+        foregroundColor: AppColors.black,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => Navigator.pop(context),
@@ -356,18 +364,9 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                     slivers: [
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
-                          child: Text(
-                            'find_location_exercise'.tr(),
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w300,
-                              fontFamily: 'Poppins',
-                              color: Colors.black,
-                              height: 1.4,
-                            ),
-                          ),
+                          padding: AppPaddings.symmReg,
+                          child: Text('find_location_exercise'.tr(),
+                              style: AppTextStyles.headline),
                         ),
                       ),
                       //Pinned: search + filters
@@ -377,8 +376,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                           child: Column(
                             children: [
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0),
+                                padding: AppPaddings.symmHorizontalReg,
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -388,11 +386,11 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                                           hintText:
                                               'search_by_name_address'.tr(),
                                           filled: true,
-                                          fillColor: Colors.grey[200],
+                                          fillColor: AppColors.lightgrey,
                                           prefixIcon: const Icon(Icons.search),
                                           border: OutlineInputBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                                AppRadius.image),
                                             borderSide: BorderSide.none,
                                           ),
                                         ),
@@ -411,7 +409,7 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                                         },
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: AppWidths.regular),
                                     GestureDetector(
                                       onTap: () {
                                         Navigator.push(
@@ -426,18 +424,17 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                                       },
                                       child: Row(
                                         children: [
-                                          Icon(Icons.map, color: Colors.black),
-                                          SizedBox(width: 4),
+                                          Icon(Icons.map),
+                                          SizedBox(width: AppWidths.small),
                                           Text('show_in_map'.tr(),
-                                              style: TextStyle(
-                                                  color: Colors.black)),
+                                              style: AppTextStyles.body),
                                         ],
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: AppHeights.reg),
                               _buildFilterChips(),
                             ],
                           ),
@@ -446,17 +443,11 @@ class _GenericSportScreenState extends State<GenericSportScreen>
                       _filteredLocations.isEmpty
                           ? SliverToBoxAdapter(
                               child: Padding(
-                                padding: const EdgeInsets.all(24),
+                                padding: AppPaddings.allSuperBig,
                                 child: Center(
-                                  child: Text(
-                                    'no_fields_found'.tr(),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 16,
-                                      fontFamily: 'Poppins',
-                                    ),
-                                  ),
+                                  child: Text('no_fields_found'.tr(),
+                                      textAlign: TextAlign.center,
+                                      style: AppTextStyles.cardTitle),
                                 ),
                               ),
                             )
@@ -508,7 +499,8 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Material(
-      color: Colors.white,
+      color: AppColors.white,
+      surfaceTintColor: Colors.transparent,
       elevation: overlapsContent ? 4 : 0,
       child: child,
     );

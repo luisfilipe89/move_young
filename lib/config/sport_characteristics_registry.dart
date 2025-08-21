@@ -10,12 +10,12 @@ class SportCharacteristics {
     'tennis': ['lit'], //to confirm these are free and public
     'beachvolleyball': ['surface', 'lit'],
     'table_tennis': ['indoor', 'covered'],
-    //Not so grouped
+    //Individual
     'fitness': ['lit'],
     'climbing': [],
     'canoeing': [],
 
-    //Radical
+    //Individual
     'skateboard': ['surface'],
     'bmx': [],
     'motocross': []
@@ -36,12 +36,12 @@ class SportCharacteristics {
     },
     'table_tennis': {},
 
-    //Not so grouped
+    //Individual
     'fitness': {},
     'climbing': {},
     'canoeing': {},
 
-    //Radical
+    //Intensive
     'skateboard': {
       'surface': ['concrete', 'wood']
     },

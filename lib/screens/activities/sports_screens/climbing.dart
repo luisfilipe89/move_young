@@ -15,7 +15,7 @@ class ClimbingScreen extends StatelessWidget {
 }
 
 class ClimbingDisplay {
-  static final Map<String, List<dynamic>> tagIcons = {
-    'lit': [Icons.lightbulb, Colors.amber],
+  static const Map<String, IconData> tagIcons = {
+    'lit': Icons.lightbulb,
   };
 }

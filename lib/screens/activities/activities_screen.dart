@@ -8,10 +8,9 @@ import 'package:move_young/screens/activities/sports_screens/fitness.dart';
 import 'package:move_young/screens/activities/sports_screens/climbing.dart';
 import 'package:move_young/screens/activities/sports_screens/skateboard.dart';
 import 'package:move_young/screens/activities/sports_screens/bmx.dart';
-import 'package:move_young/screens/activities/sports_screens/motocross.dart';
-
 import 'package:move_young/widgets/activity_category_page.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:move_young/theme/tokens.dart';
 
 class ActivitiesScreen extends StatefulWidget {
   const ActivitiesScreen({super.key});
@@ -36,12 +35,12 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     super.dispose();
   }
 
-  final List<String> categories = ['grouped', 'not_so_grouped', 'radical'];
+  final List<String> categories = ['grouped', 'individual', 'intensive'];
 
   final Map<String, String> categoryKeys = {
     'grouped': 'grouped',
-    'not_so_grouped': 'not_so_grouped',
-    'radical': 'radical',
+    'individual': 'individual',
+    'intensive': 'intensive',
   };
 
   final Map<String, List<Map<String, String>>> activities = {
@@ -76,7 +75,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         'calories': '250Kcal/hr',
       },
     ],
-    'not_so_grouped': [
+    'individual': [
       {
         'title': 'fitness',
         'image': 'assets/images/fitness_station.jpg',
@@ -96,7 +95,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
         'align': '0,0.2'
       }
     ],
-    'radical': [
+    'intensive': [
       {
         'title': 'skateboard',
         'image': 'assets/images/skateboarding2.webp',
@@ -146,15 +145,12 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
       case 'climbing':
         screen = const ClimbingScreen();
         break;
-      //Radical
+      //Intensive
       case 'skateboard':
         screen = const SkateboardScreen();
         break;
       case 'bmx':
         screen = const BmxScreen();
-        break;
-      case 'motocross':
-        screen = const MotocrossScreen();
         break;
     }
 
@@ -175,34 +171,24 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('🔥', style: TextStyle(fontSize: 14)),
-        const SizedBox(width: 4),
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 13,
-            color: Colors.black54,
-            fontWeight: FontWeight.w400,
-            fontFamily: 'Poppins',
-          ),
-        ),
+        const Text('🔥', style: AppTextStyles.body),
+        const SizedBox(width: AppWidths.small),
+        Text(text, style: AppTextStyles.small),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: AppPaddings.symmHorizontalReg,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
+              const SizedBox(height: AppHeights.superbig),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -213,39 +199,26 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                   const Icon(Icons.menu, size: 28),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppHeights.superbig),
               Expanded(
                 child: Container(
-                  height: screenHeight * 0.85,
-                  padding: const EdgeInsets.all(24),
+                  padding: AppPaddings.allSuperBig,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x26000000),
-                        blurRadius: 16,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
+                      color: AppColors.white,
+                      borderRadius:
+                          BorderRadius.circular(AppRadius.bigContainer),
+                      boxShadow: AppShadows.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'find_your_activity'.tr(),
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w300,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      const SizedBox(height: 24),
+                      Text('find_your_activity'.tr(),
+                          style: AppTextStyles.huge),
+                      const SizedBox(height: AppHeights.superHuge),
                       Row(
                         children: List.generate(categories.length, (index) {
                           final isSelected = index == selectedCategoryIndex;
                           return Padding(
-                            padding: const EdgeInsets.only(right: 24),
+                            padding: AppPaddings.rightSuperBig,
                             child: GestureDetector(
                               behavior: HitTestBehavior.translucent,
                               onTap: () {
@@ -257,26 +230,17 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                                 );
                               },
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4.0, vertical: 8),
+                                padding: AppPaddings.symmSpecial,
                                 child: Column(
                                   children: [
-                                    Text(
-                                      categories[index].tr(),
-                                      style: TextStyle(
-                                        fontSize: 14.5,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black
-                                            .withAlpha((0.6 * 255).round()),
-                                      ),
-                                    ),
+                                    Text(categories[index].tr(),
+                                        style: AppTextStyles.special),
                                     if (isSelected)
                                       Container(
-                                        margin: const EdgeInsets.only(top: 6),
-                                        width: 20,
+                                        margin: AppPaddings.topSmall,
+                                        width: AppWidths.huge,
                                         height: 2,
-                                        color: Colors.black,
+                                        color: AppColors.blackIcon,
                                       ),
                                   ],
                                 ),
@@ -285,7 +249,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
                           );
                         }),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppHeights.superHuge),
                       Expanded(
                         child: PageView.builder(
                           controller: _pageController,

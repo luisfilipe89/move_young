@@ -15,7 +15,7 @@ class BmxScreen extends StatelessWidget {
 }
 
 class BmxDisplay {
-  static final Map<String, List<dynamic>> tagIcons = {
-    'lit': [Icons.lightbulb, Colors.amber],
+  static const Map<String, IconData> tagIcons = {
+    'lit': Icons.lightbulb,
   };
 }

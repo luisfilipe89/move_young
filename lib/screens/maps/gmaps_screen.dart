@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:move_young/theme/tokens.dart';
 
 class GenericMapScreen extends StatefulWidget {
   final String title;
@@ -164,7 +165,7 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
           ? Center(
               child: Text(
                 _locationError!,
-                style: const TextStyle(fontSize: 16, color: Colors.black54),
+                style: AppTextStyles.cardTitle,
                 textAlign: TextAlign.center,
               ),
             )
@@ -195,11 +196,10 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
                       bottom: 28, // slightly above Google logo
                       child: Container(
                         color: Colors.white.withValues(alpha: 0.7),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                        padding: AppPaddings.symmSuperSmall,
                         child: const Text(
                           '© OpenStreetMap contributors (ODbL)',
-                          style: TextStyle(fontSize: 10, color: Colors.black),
+                          style: AppTextStyles.supersmall,
                         ),
                       ),
                     ),
@@ -210,23 +210,20 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
           : SafeArea(
               child: SingleChildScrollView(
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppPaddings.allReg,
                   decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(16)),
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(AppRadius.card)),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '📍 ${_selectedLocation!['name'] ?? 'unnamed_location'.tr()}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
+                          '📍 ${_selectedLocation!['name'] ?? 'unnamed_location'.tr()}',
+                          style: AppTextStyles.cardTitle),
+                      const SizedBox(height: AppHeights.small),
                       Builder(
                         builder: (context) {
                           final rawSurface =
@@ -241,12 +238,11 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
 
                           return Text(
                             '$surfaceLabel$litLabel',
-                            style: const TextStyle(
-                                fontSize: 14, color: Colors.black87),
+                            style: AppTextStyles.body,
                           );
                         },
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppHeights.big),
                       const Divider(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -266,7 +262,7 @@ class _GenericMapScreenState extends State<GenericMapScreen> {
                             icon: const Icon(Icons.directions),
                             label: Text("directions".tr()),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppWidths.big),
                           ElevatedButton.icon(
                             onPressed: () {
                               final lat = _selectedLocation!['lat'];

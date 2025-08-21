@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:move_young/models/event_model.dart';
 import 'package:move_young/services/load_events_from_json.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:move_young/theme/tokens.dart';
 
 class HomeScreenNew extends StatefulWidget {
   const HomeScreenNew({super.key});
@@ -29,27 +30,21 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F3F3),
+      backgroundColor: AppColors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF3F3F3),
+        backgroundColor: AppColors.white,
         elevation: 0,
-        leading: const Icon(Icons.menu, color: Colors.black),
+        leading: const Icon(Icons.menu),
         title: const Text(
           'SMARTPLAYER',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.2,
-            fontFamily: 'Poppins',
-          ),
         ),
         centerTitle: true,
         actions: [
           TextButton.icon(
-            icon: const Icon(Icons.language, color: Colors.black),
+            icon: const Icon(Icons.language),
             label: Text(
               context.locale.languageCode == 'nl' ? 'EN' : 'NL',
-              style: const TextStyle(fontSize: 14, fontFamily: 'Poppins'),
+              style: AppTextStyles.body,
             ),
             onPressed: () {
               final curr = context.locale;
@@ -59,10 +54,10 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                     : const Locale('nl'),
               );
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.black),
+            style: TextButton.styleFrom(foregroundColor: AppColors.blackIcon),
           ),
           IconButton(
-            icon: const Icon(Icons.qr_code, color: Colors.black),
+            icon: const Icon(Icons.qr_code),
             onPressed: () {
               // TODO: Implement QR code scan
             },
@@ -71,32 +66,18 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppPaddings.allReg,
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(20),
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(AppRadius.container),
+                boxShadow: AppShadows.md),
+            padding: AppPaddings.allBig,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "hello".tr(),
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w300,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                const SizedBox(height: 24),
+                Text("hello".tr(), style: AppTextStyles.headline),
+                const SizedBox(height: AppHeights.huge),
 
                 // Tile to go to Activities Screen
                 GestureDetector(
@@ -105,23 +86,16 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x33000000),
-                          blurRadius: 12,
-                          offset: Offset(0, 6),
-                        ),
-                      ],
-                    ),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(AppRadius.card),
+                        boxShadow: AppShadows.md),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ClipRRect(
                           borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            topRight: Radius.circular(16),
+                            topLeft: Radius.circular(AppRadius.card),
+                            topRight: Radius.circular(AppRadius.card),
                           ),
                           child: Image.asset(
                             'assets/images/general_public.jpg',
@@ -131,27 +105,15 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: AppPaddings.allMedium,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "check_for_fields".tr(),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
+                              Text("check_for_fields".tr(),
+                                  style: AppTextStyles.cardTitle),
                               SizedBox(height: 1),
-                              Text(
-                                "look_for_fields".tr(),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black54,
-                                  fontFamily: 'Poppins',
-                                ),
-                              ),
+                              Text("look_for_fields".tr(),
+                                  style: AppTextStyles.bodyMuted),
                             ],
                           ),
                         ),
@@ -159,50 +121,31 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppHeights.huge),
 
                 // Upcoming Events Tile
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color(0x33000000),
-                        blurRadius: 12,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(AppRadius.card),
+                      boxShadow: AppShadows.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: AppPaddings.allMedium,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "upcoming_events".tr(),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              "join_sports_event".tr(),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
+                            Text("upcoming_events".tr(),
+                                style: AppTextStyles.cardTitle),
+                            SizedBox(height: AppHeights.small),
+                            Text("join_sports_event".tr(),
+                                style: AppTextStyles.body),
                           ],
                         ),
                       ),
-                      Divider(height: 1, color: Colors.grey[300]),
+                      Divider(height: 1, color: AppColors.lightgrey),
                       SizedBox(
                         height: 240,
                         child: ListView.builder(
@@ -215,21 +158,17 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                             return Column(
                               children: [
                                 ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 4),
-                                  leading: const Icon(Icons.event,
-                                      color: Colors.black),
+                                  contentPadding:
+                                      AppPaddings.symmHorizontalMedium,
+                                  leading: const Icon(Icons.event),
                                   title: Text(
                                     event.title,
-                                    style: const TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15),
+                                    style: AppTextStyles.cardTitle,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   subtitle: Padding(
-                                    padding: const EdgeInsets.only(top: 4),
+                                    padding: AppPaddings.topSuperSmall,
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -237,13 +176,14 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                                         Row(
                                           children: [
                                             const Icon(Icons.access_time,
-                                                size: 14, color: Colors.grey),
-                                            const SizedBox(width: 4),
+                                                size: 14,
+                                                color: AppColors.grey),
+                                            const SizedBox(
+                                                width: AppWidths.small),
                                             Expanded(
                                               child: Text(
                                                 event.dateTime,
-                                                style: const TextStyle(
-                                                    fontSize: 13),
+                                                style: AppTextStyles.small,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
@@ -253,13 +193,14 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                                         Row(
                                           children: [
                                             const Icon(Icons.group,
-                                                size: 14, color: Colors.grey),
-                                            const SizedBox(width: 4),
+                                                size: 14,
+                                                color: AppColors.grey),
+                                            const SizedBox(
+                                                width: AppWidths.small),
                                             Expanded(
                                               child: Text(
                                                 event.targetGroup,
-                                                style: const TextStyle(
-                                                    fontSize: 13),
+                                                style: AppTextStyles.small,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
@@ -269,14 +210,14 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                                         Row(
                                           children: [
                                             const Icon(Icons.location_on,
-                                                size: 14, color: Colors.grey),
-                                            const SizedBox(width: 4),
+                                                size: 14,
+                                                color: AppColors.grey),
+                                            const SizedBox(
+                                                width: AppWidths.small),
                                             Expanded(
                                               child: Text(
                                                 event.location,
-                                                style: const TextStyle(
-                                                    fontSize: 13,
-                                                    color: Colors.black87),
+                                                style: AppTextStyles.small,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
@@ -286,14 +227,14 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                                         Row(
                                           children: [
                                             const Icon(Icons.euro,
-                                                size: 14, color: Colors.grey),
-                                            const SizedBox(width: 4),
+                                                size: 14,
+                                                color: AppColors.grey),
+                                            const SizedBox(
+                                                width: AppWidths.small),
                                             Expanded(
                                               child: Text(
                                                 event.cost,
-                                                style: TextStyle(
-                                                    fontSize: 13,
-                                                    color: Colors.grey[700]),
+                                                style: AppTextStyles.smallMuted,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
@@ -310,10 +251,9 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                                 ),
                                 if (index != events.length - 1)
                                   const Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 12),
-                                    child:
-                                        Divider(height: 1, color: Colors.grey),
+                                    padding: AppPaddings.symmHorizontalMedium,
+                                    child: Divider(
+                                        height: 1, color: AppColors.grey),
                                   ),
                               ],
                             );
@@ -321,11 +261,12 @@ class _HomeScreenNewState extends State<HomeScreenNew> {
                         ), // end Column (Upcoming Events Tile)
                       ),
                       const SizedBox(
-                          height: 30), // end Container (Upcoming Events Tile)
+                          height: AppHeights
+                              .superHuge), // end Container (Upcoming Events Tile)
                     ],
                   ), // end main Column
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppHeights.huge),
               ], // end main Container
             ), // end Padding
           ),

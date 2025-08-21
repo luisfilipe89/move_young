@@ -6,9 +6,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:move_young/constants.dart';
 import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:move_young/theme/tokens.dart';
 
 class AgendaScreen extends StatefulWidget {
   const AgendaScreen({super.key});
@@ -132,19 +132,19 @@ class _AgendaScreenState extends State<AgendaScreen> {
   Widget _buildFilterChipsRow() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: AppPaddings.symmHorizontalReg,
       child: Row(
         children: [
           // Recurring
           Padding(
-            padding: const EdgeInsets.only(right: 8.0),
+            padding: AppPaddings.rightSmall,
             child: FilterChip(
               label: Text('recurring'.tr()),
               selected: _showRecurring,
               showCheckmark: false,
               avatar: Icon(
                 _showRecurring ? Icons.repeat : Icons.repeat_on_outlined,
-                color: _showRecurring ? Colors.amber[600] : Colors.grey,
+                color: _showRecurring ? AppColors.amber : AppColors.grey,
                 size: 18,
               ),
               onSelected: (selected) {
@@ -158,14 +158,14 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
           // One-time
           Padding(
-            padding: const EdgeInsets.only(right: 8.0),
+            padding: AppPaddings.rightSmall,
             child: FilterChip(
               label: Text('one_time'.tr()),
               selected: _showOneTime,
               showCheckmark: false,
               avatar: Icon(
                 _showOneTime ? Icons.event_available : Icons.event_note,
-                color: _showOneTime ? Colors.amber[600] : Colors.grey,
+                color: _showOneTime ? AppColors.amber : AppColors.grey,
                 size: 18,
               ),
               onSelected: (selected) {
@@ -183,14 +183,14 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   Widget _buildShimmerPlaceholder() {
     return Shimmer.fromColors(
-      baseColor: Colors.grey,
-      highlightColor: Colors.white,
+      baseColor: AppColors.grey,
+      highlightColor: AppColors.white,
       child: Container(
-        height: kImageHeight,
+        height: AppHeights.image,
         width: double.infinity,
         decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          color: AppColors.white,
+          borderRadius: BorderRadius.all(Radius.circular(AppRadius.card)),
         ),
       ),
     );
@@ -198,99 +198,80 @@ class _AgendaScreenState extends State<AgendaScreen> {
 
   Widget _buildEventCard(Event event) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      padding: kCardPadding,
+      margin: AppPaddings.symmReg,
+      padding: AppPaddings.allMedium,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(kCardRadius),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          boxShadow: AppShadows.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (event.imageUrl?.isNotEmpty ?? false)
             ClipRRect(
-              borderRadius: BorderRadius.circular(kImageRadius),
+              borderRadius: BorderRadius.circular(AppRadius.image),
               child: CachedNetworkImage(
                 imageUrl: event.imageUrl!,
-                height: kImageHeight,
+                height: AppHeights.image,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                fadeInDuration: kFadeDuration,
+                fadeInDuration: Duration(milliseconds: 300),
                 fadeInCurve: Curves.easeInOut,
                 placeholder: (context, url) => _buildShimmerPlaceholder(),
                 errorWidget: (context, url, error) => Container(
-                  height: kImageHeight,
-                  color: Colors.grey[300],
+                  height: AppHeights.image,
+                  color: AppColors.lightgrey,
                   child: const Icon(Icons.broken_image),
                 ),
               ),
             )
           else
             Container(
-              height: kImageHeight,
+              height: AppHeights.image,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(kImageRadius),
+                color: AppColors.grey,
+                borderRadius: BorderRadius.circular(AppRadius.image),
               ),
               child: const Center(child: Icon(Icons.image_not_supported)),
             ),
-          const SizedBox(height: 8),
-          Text(
-            event.title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Poppins',
-            ),
-          ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppHeights.reg),
+          Text(event.title, style: AppTextStyles.cardTitle),
+          const SizedBox(height: AppHeights.reg),
           Row(
             children: [
-              Icon(Icons.access_time, size: 16, color: Colors.grey[700]),
-              const SizedBox(width: 4),
-              Text(event.dateTime,
-                  style: const TextStyle(color: Colors.black54)),
+              Icon(Icons.access_time, size: 16, color: AppColors.darkgrey),
+              const SizedBox(width: AppWidths.small),
+              Text(event.dateTime, style: AppTextStyles.small),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppHeights.small),
           Row(
             children: [
-              Icon(Icons.location_on, size: 16, color: Colors.grey[700]),
-              const SizedBox(width: 4),
+              Icon(Icons.location_on, size: 16, color: AppColors.darkgrey),
+              const SizedBox(width: AppWidths.small),
               Expanded(
-                child: Text(event.location,
-                    style: const TextStyle(color: Colors.black54)),
+                child: Text(event.location, style: AppTextStyles.small),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppHeights.small),
           Row(
             children: [
-              Icon(Icons.group, size: 16, color: Colors.grey[700]),
-              const SizedBox(width: 4),
-              Text(event.targetGroup, style: const TextStyle(fontSize: 13)),
+              Icon(Icons.group, size: 16, color: AppColors.darkgrey),
+              const SizedBox(width: AppWidths.small),
+              Text(event.targetGroup, style: AppTextStyles.small),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppHeights.small),
           Row(
             children: [
-              Icon(Icons.euro, size: 16, color: Colors.grey[700]),
-              const SizedBox(width: 4),
-              Text(
-                event.cost.replaceAll('€', '').trim(),
-                style:
-                    const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-              ),
+              Icon(Icons.euro, size: 16, color: AppColors.darkgrey),
+              const SizedBox(width: AppWidths.small),
+              Text(event.cost.replaceAll('€', '').trim(),
+                  style: AppTextStyles.smallMuted),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppHeights.big),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -300,8 +281,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
                       ? Icons.favorite
                       : Icons.favorite_border,
                   color: _favoriteTitles.contains(event.title)
-                      ? Colors.red
-                      : Colors.black,
+                      ? AppColors.red
+                      : AppColors.blackIcon,
                 ),
                 tooltip: 'Favorite',
                 onPressed: () => _toggleFavorite(event.title),
@@ -335,14 +316,11 @@ class _AgendaScreenState extends State<AgendaScreen> {
                   icon: const Icon(Icons.open_in_new),
                   label: Text('to_enroll'.tr()),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
+                    backgroundColor: AppColors.green,
+                    foregroundColor: AppColors.white,
+                    padding: AppPaddings.symmSmall,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppRadius.smallCard),
                     ),
                   ),
                 ),
@@ -373,8 +351,8 @@ class _AgendaScreenState extends State<AgendaScreen> {
               floating: false,
               snap: false,
               elevation: 0,
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black,
+              backgroundColor: AppColors.white,
+              foregroundColor: AppColors.black,
               centerTitle: true,
               title: Text('agenda'.tr()),
             ),
@@ -382,20 +360,13 @@ class _AgendaScreenState extends State<AgendaScreen> {
             // --- Subtitle (non-pinned) ---
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8.0),
+                padding: AppPaddings.symmReg,
                 child: Text(
-                  'find_your_next_event_for_exercise'.tr(
-                    args: const [], // add key to your locales
-                  ),
-                  textAlign: TextAlign.left,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w300,
-                    fontFamily: 'Poppins',
-                    color: Colors.black,
-                    height: 1.4,
-                  ),
-                ),
+                    'find_your_next_event_for_exercise'.tr(
+                      args: const [], // add key to your locales
+                    ),
+                    textAlign: TextAlign.left,
+                    style: AppTextStyles.headline),
               ),
             ),
 
@@ -406,23 +377,24 @@ class _AgendaScreenState extends State<AgendaScreen> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: AppPaddings.symmHorizontalReg,
                       child: TextField(
                         controller: _searchController,
                         decoration: InputDecoration(
                           hintText: 'search_events'.tr(),
                           filled: true,
-                          fillColor: Colors.grey[200],
+                          fillColor: AppColors.lightgrey,
                           prefixIcon: const Icon(Icons.search),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(kImageRadius),
+                            borderRadius:
+                                BorderRadius.circular(AppRadius.image),
                             borderSide: BorderSide.none,
                           ),
                         ),
                         onChanged: _onSearchChanged,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppHeights.reg),
                     _buildFilterChipsRow(),
                   ],
                 ),
@@ -433,17 +405,12 @@ class _AgendaScreenState extends State<AgendaScreen> {
             if (filteredEvents.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(24),
+                  padding: AppPaddings.allSuperBig,
                   child: Center(
-                    child: Text(
-                      'no_events_found'.tr(), // add this key if needed
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                        fontFamily: 'Poppins',
-                      ),
-                    ),
+                    child:
+                        Text('no_events_found'.tr(), // add this key if needed
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.cardTitle),
                   ),
                 ),
               )
@@ -470,7 +437,7 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Material(
-      color: Colors.white,
+      color: AppColors.white,
       elevation: overlapsContent ? 4 : 0,
       child: child,
     );

@@ -15,9 +15,9 @@ class BasketballScreen extends StatelessWidget {
 }
 
 class BasketballDisplay {
-  static final Map<String, List<Object>> tagIcons = <String, List<Object>>{
-    'surface': [Icons.sports_basketball, Colors.orange],
-    'lit': [Icons.lightbulb_outline, Colors.amber],
-    'hoops': [Icons.sports, Colors.orange],
+  static const Map<String, IconData> tagIcons = {
+    'surface': Icons.park,
+    'artificial_turf': Icons.sports_basketball,
+    'lit': Icons.lightbulb,
   };
 }

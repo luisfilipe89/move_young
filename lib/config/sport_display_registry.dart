@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:move_young/screens/activities/sports_screens/soccer.dart';
 import 'package:move_young/screens/activities/sports_screens/basketball.dart';
 import 'package:move_young/screens/activities/sports_screens/tennis.dart';
@@ -8,27 +9,24 @@ import 'package:move_young/screens/activities/sports_screens/climbing.dart';
 import 'package:move_young/screens/activities/sports_screens/canoeing.dart';
 import 'package:move_young/screens/activities/sports_screens/skateboard.dart';
 import 'package:move_young/screens/activities/sports_screens/bmx.dart';
-import 'package:move_young/screens/activities/sports_screens/motocross.dart';
 
 class SportDisplayRegistry {
-  static final Map<String, Map<String, List<dynamic>>> _iconMapRegistry = {
-    //Grouped
+  // Build once; no getters that reconstruct by calling back into sports.
+  static const Map<String, Map<String, IconData>> _iconMaps = {
     'soccer': SoccerDisplay.tagIcons,
     'basketball': BasketballDisplay.tagIcons,
     'tennis': TennisDisplay.tagIcons,
     'beachvolleyball': BeachVolleyBallDisplay.tagIcons,
     'table_tennis': TableTennisDisplay.tagIcons,
-    //Not so Grouped
+    //Individual
     'fitness': FitnessDisplay.tagIcons,
     'climbing': ClimbingDisplay.tagIcons,
     'canoeing': CanoingDisplay.tagIcons,
-    //Radical
+    //Intensive
     'skateboard': SkateboardDisplay.tagIcons,
     'bmx': BmxDisplay.tagIcons,
-    'motocross': MotocrossDisplay.tagIcons
   };
 
-  static Map<String, List<dynamic>> getIconMap(String sportType) {
-    return _iconMapRegistry[sportType] ?? {};
-  }
+  static Map<String, IconData> getIconMap(String sport) =>
+      _iconMaps[sport] ?? const {};
 }

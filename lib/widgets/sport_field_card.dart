@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:move_young/theme/tokens.dart';
 
 class SportFieldCard extends StatelessWidget {
   final Map<String, dynamic> field;
@@ -29,28 +30,21 @@ class SportFieldCard extends StatelessWidget {
     final imageUrl = field['tags']?['image'];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: AppPaddings.symmReg,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
+            color: AppColors.white,
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            boxShadow: AppShadows.md),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: AppPaddings.allReg,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Image
               if (imageUrl != null)
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.image),
                   child: CachedNetworkImage(
                     imageUrl: imageUrl,
                     height: 140,
@@ -63,7 +57,7 @@ class SportFieldCard extends StatelessWidget {
                     ),
                     errorWidget: (context, url, error) => Container(
                       height: 140,
-                      color: Colors.grey[300],
+                      color: AppColors.lightgrey,
                       child: const Icon(Icons.broken_image),
                     ),
                   ),
@@ -72,8 +66,8 @@ class SportFieldCard extends StatelessWidget {
                 Container(
                   height: 140,
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.superlightgrey,
+                    borderRadius: BorderRadius.circular(AppRadius.image),
                   ),
                   child: const Center(child: Icon(Icons.image_not_supported)),
                 ),
@@ -83,22 +77,16 @@ class SportFieldCard extends StatelessWidget {
               FutureBuilder<String>(
                 future: getDisplayName(field),
                 builder: (context, snapshot) {
-                  return Text(
-                    snapshot.data ?? 'unnamed_field'.tr(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
-                    ),
-                  );
+                  return Text(snapshot.data ?? 'unnamed_field'.tr(),
+                      style: AppTextStyles.cardTitle);
                 },
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppHeights.small),
 
               // Distance
               Text(
                 distanceText,
-                style: const TextStyle(color: Colors.black54),
+                style: TextStyle(color: AppColors.blackopac),
               ),
               const SizedBox(height: 8),
 
@@ -109,14 +97,15 @@ class SportFieldCard extends StatelessWidget {
               // Action Buttons
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 4),
+                  padding: AppPaddings.topSuperSmall,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       IconButton(
                         icon: Icon(
                           isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorite ? Colors.red : Colors.black,
+                          color:
+                              isFavorite ? AppColors.red : AppColors.blackIcon,
                           size: 24,
                         ),
                         tooltip: 'favorite'.tr(),

@@ -15,7 +15,7 @@ class FitnessScreen extends StatelessWidget {
 }
 
 class FitnessDisplay {
-  static final Map<String, List<dynamic>> tagIcons = {
-    'lit': [Icons.lightbulb, Colors.amber],
+  static const Map<String, IconData> tagIcons = {
+    'lit': Icons.lightbulb,
   };
 }
