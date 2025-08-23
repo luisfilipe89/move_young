@@ -3,16 +3,17 @@
 import 'package:flutter/material.dart';
 import 'package:move_young/widgets/activity_card.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:move_young/models/activity.dart';
 
 class ActivityCategoryPage extends StatefulWidget {
-  final List<Map<String, String>> activities;
-  final Function(String title) onTapActivity;
-
   const ActivityCategoryPage({
     super.key,
     required this.activities,
     required this.onTapActivity,
   });
+
+  final List<Activity> activities;
+  final void Function(String key) onTapActivity;
 
   @override
   State<ActivityCategoryPage> createState() => _ActivityCategoryPageState();
@@ -23,44 +24,23 @@ class _ActivityCategoryPageState extends State<ActivityCategoryPage>
   @override
   bool get wantKeepAlive => true;
 
-  Alignment _parseAlignment(String? v) {
-    switch (v) {
-      case 'top':
-        return Alignment.topCenter;
-      case 'bottom':
-        return Alignment.bottomCenter;
-      case 'left':
-        return Alignment.centerLeft;
-      case 'right':
-        return Alignment.centerRight;
-      case 'center':
-        return Alignment.center;
-      default:
-        if (v == null || !v.contains(',')) return Alignment.center;
-        final parts = v.split(',');
-        final dx = double.tryParse(parts[0].trim()) ?? 0.0;
-        final dy = double.tryParse(parts[1].trim()) ?? 0.0;
-        return Alignment(dx, dy); // e.g. "0,-0.6"
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    super.build(context); // ⚠️ required!
+    super.build(context); // ⚠️ required!.
+
     return ListView.builder(
       padding: EdgeInsets.zero,
-      shrinkWrap: true,
+      cacheExtent: 400,
       itemCount: widget.activities.length,
       itemBuilder: (context, index) {
-        final activity = widget.activities[index];
-        final Alignment imageAlignment = _parseAlignment(activity['align']);
+        final a = widget.activities[index];
 
         return ActivityCard(
-          title: activity['title']!.tr(),
-          imageUrl: activity['image'] ?? '',
-          calories: activity['calories'] ?? '',
-          imageAlignment: imageAlignment,
-          onTap: () => widget.onTapActivity(activity['title']!),
+          title: a.key.tr(), // localize by key
+          imageUrl: a.image,
+          calories: 'calories_per_hour'.tr(args: ['${a.kcalPerHour}']),
+          imageAlignment: a.align ?? Alignment.center,
+          onTap: () => widget.onTapActivity(a.key),
         );
       },
     );

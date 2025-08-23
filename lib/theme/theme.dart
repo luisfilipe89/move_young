@@ -23,14 +23,7 @@ class AppTheme {
         centerTitle: true,
         // If you want a consistent title style everywhere:
 
-        titleTextStyle: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 20,
-          fontWeight: FontWeight.w500, // nice semi-bold
-          color: AppColors.blackText, // 87% black
-          letterSpacing: 0.15,
-        ),
-
+        titleTextStyle: AppTextStyles.title,
         iconTheme: IconThemeData(color: AppColors.blackIcon),
       ), // no colors, no shapes, no component themes
     );

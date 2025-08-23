@@ -58,10 +58,11 @@ class AppPaddings {
   static const symmSmall = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
   static const symmReg = EdgeInsets.symmetric(horizontal: 16, vertical: 8);
   static const symmSpecial = EdgeInsets.symmetric(horizontal: 4, vertical: 8);
-
   //Symmetric Horizontal
   static const symmHorizontalMedium = EdgeInsets.symmetric(horizontal: 12);
   static const symmHorizontalReg = EdgeInsets.symmetric(horizontal: 16);
+  //Symmetrical Vertical
+  static const symmVerticalSmall = EdgeInsets.symmetric(vertical: 8);
   //All
   static const allSmall = EdgeInsets.all(8);
   static const allMedium = EdgeInsets.all(12);
@@ -101,6 +102,14 @@ class AppTextStyles {
   static const huge = TextStyle(
     fontSize: 36,
     fontWeight: FontWeight.w300,
+  );
+
+  static const title = TextStyle(
+    fontFamily: 'Poppins',
+    fontSize: 20,
+    fontWeight: FontWeight.w500, // nice semi-bold
+    color: AppColors.blackText, // 87% black
+    letterSpacing: 0.15,
   );
 
   static const headline = TextStyle(

@@ -28,15 +28,24 @@ class WalletScreen extends StatelessWidget {
 }
 
 // ---------------------------- Main Scaffold ----------------------------
+// Tab indices (match your BottomNav order)
+const int kTabHome = 0;
+const int kTabFavorites = 1;
+const int kTabAgenda = 2;
+const int kTabWallet = 3;
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
 
+  // Handy way to reach the state from any descendant
+  static MainScaffoldState? maybeOf(BuildContext context) =>
+      context.findAncestorStateOfType<MainScaffoldState>();
+
   @override
-  State<MainScaffold> createState() => _MainScaffoldState();
+  State<MainScaffold> createState() => MainScaffoldState();
 }
 
-class _MainScaffoldState extends State<MainScaffold> {
+class MainScaffoldState extends State<MainScaffold> {
   int _currentIndex = 0;
 
   final _homeKey = GlobalKey<NavigatorState>();
@@ -44,17 +53,22 @@ class _MainScaffoldState extends State<MainScaffold> {
   final _agendaKey = GlobalKey<NavigatorState>();
   final _walletKey = GlobalKey<NavigatorState>();
 
-  NavigatorState get _currentNavigator {
+  void switchToTab(int index, {bool popToRoot = false}) {
+    if (popToRoot) _popToRoot(index);
+    setState(() => _currentIndex = index);
+  }
+
+  NavigatorState? get _maybeCurrentNavigator {
     switch (_currentIndex) {
-      case 0:
-        return _homeKey.currentState!;
-      case 1:
-        return _favoritesKey.currentState!;
-      case 2:
-        return _agendaKey.currentState!;
-      case 3:
+      case kTabHome:
+        return _homeKey.currentState;
+      case kTabFavorites:
+        return _favoritesKey.currentState;
+      case kTabAgenda:
+        return _agendaKey.currentState;
+      case kTabWallet:
       default:
-        return _walletKey.currentState!;
+        return _walletKey.currentState;
     }
   }
 
@@ -70,7 +84,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
-        final popped = await _currentNavigator.maybePop();
+        final popped = await _maybeCurrentNavigator?.maybePop() ?? false;
         if (popped) return;
 
         if (_currentIndex != 0) {
@@ -82,10 +96,18 @@ class _MainScaffoldState extends State<MainScaffold> {
         body: IndexedStack(
           index: _currentIndex,
           children: <Widget>[
-            _HomeFlow(navigatorKey: _homeKey),
-            _FavoritesFlow(navigatorKey: _favoritesKey),
-            _AgendaFlow(navigatorKey: _agendaKey),
-            _WalletFlow(navigatorKey: _walletKey),
+            HeroMode(
+                enabled: _currentIndex == kTabHome,
+                child: _HomeFlow(navigatorKey: _homeKey)),
+            HeroMode(
+                enabled: _currentIndex == kTabFavorites,
+                child: _FavoritesFlow(navigatorKey: _favoritesKey)),
+            HeroMode(
+                enabled: _currentIndex == kTabAgenda,
+                child: _AgendaFlow(navigatorKey: _agendaKey)),
+            HeroMode(
+                enabled: _currentIndex == kTabWallet,
+                child: _WalletFlow(navigatorKey: _walletKey)),
           ],
         ),
         bottomNavigationBar: _BottomBar(
