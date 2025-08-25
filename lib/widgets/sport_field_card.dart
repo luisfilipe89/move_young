@@ -1,5 +1,7 @@
+// lib/widgets/sport_field_card.dart
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:move_young/theme/tokens.dart';
 
@@ -27,99 +29,110 @@ class SportFieldCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = field['tags']?['image'];
+    final imageUrl = field['tags']?['image'] as String?;
+    final imgH = AppHeights.cardImage(context);
 
-    return Padding(
-      padding: AppPaddings.symmReg,
-      child: Container(
-        decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            boxShadow: AppShadows.md),
+    return Container(
+      margin: AppPaddings.topBottom,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        boxShadow: AppShadows.md,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        clipBehavior: Clip.antiAlias,
         child: Padding(
           padding: AppPaddings.allReg,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image
-              if (imageUrl != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.image),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    height: 140,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    fadeInDuration: const Duration(milliseconds: 300),
-                    placeholder: (context, url) => const SizedBox(
-                      height: 140,
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      height: 140,
-                      color: AppColors.lightgrey,
-                      child: const Icon(Icons.broken_image),
-                    ),
-                  ),
-                )
-              else
-                Container(
-                  height: 140,
-                  decoration: BoxDecoration(
-                    color: AppColors.superlightgrey,
-                    borderRadius: BorderRadius.circular(AppRadius.image),
-                  ),
-                  child: const Center(child: Icon(Icons.image_not_supported)),
+              // ---------- Image ----------
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.image),
+                child: _ImageWithShimmer(
+                  imageUrl: imageUrl,
+                  height: imgH,
                 ),
-              const SizedBox(height: 2),
+              ),
 
-              // Title
+              const SizedBox(height: 8),
+
+              // ---------- Title ----------
               FutureBuilder<String>(
                 future: getDisplayName(field),
                 builder: (context, snapshot) {
-                  return Text(snapshot.data ?? 'unnamed_field'.tr(),
-                      style: AppTextStyles.cardTitle);
+                  final title = snapshot.hasData &&
+                          (snapshot.data ?? '').trim().isNotEmpty
+                      ? snapshot.data!
+                      : 'unnamed_field'.tr();
+
+                  return Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.cardTitle,
+                  );
                 },
               ),
-              const SizedBox(height: AppHeights.small),
 
-              // Distance
+              const SizedBox(height: 4),
+
+              // ---------- Distance ----------
               Text(
                 distanceText,
                 style: TextStyle(color: AppColors.blackopac),
               ),
+
               const SizedBox(height: 8),
 
-              // Characteristics
+              // ---------- Characteristics ----------
               characteristics,
+
               const SizedBox(height: 6),
 
-              // Action Buttons
+              // ---------- Actions ----------
               Center(
                 child: Padding(
                   padding: AppPaddings.topSuperSmall,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      IconButton(
-                        icon: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color:
-                              isFavorite ? AppColors.red : AppColors.blackIcon,
-                          size: 24,
+                      Semantics(
+                        button: true,
+                        label: isFavorite
+                            ? 'remove_from_favorites'.tr()
+                            : 'add_to_favorites'.tr(),
+                        child: IconButton(
+                          icon: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite
+                                ? AppColors.red
+                                : AppColors.blackIcon,
+                            size: 24,
+                          ),
+                          tooltip: 'favorite'.tr(),
+                          onPressed: onToggleFavorite,
                         ),
-                        tooltip: 'favorite'.tr(),
-                        onPressed: onToggleFavorite,
                       ),
-                      IconButton(
-                        icon: Icon(Icons.share, size: 24),
-                        tooltip: 'share_location'.tr(),
-                        onPressed: onShare,
+                      Semantics(
+                        button: true,
+                        label: 'share_location'.tr(),
+                        child: IconButton(
+                          icon: const Icon(Icons.share, size: 24),
+                          tooltip: 'share_location'.tr(),
+                          onPressed: onShare,
+                        ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.directions, size: 24),
-                        tooltip: 'directions'.tr(),
-                        onPressed: onDirections,
+                      Semantics(
+                        button: true,
+                        label: 'directions'.tr(),
+                        child: IconButton(
+                          icon: const Icon(Icons.directions, size: 24),
+                          tooltip: 'directions'.tr(),
+                          onPressed: onDirections,
+                        ),
                       ),
                     ],
                   ),
@@ -129,6 +142,50 @@ class SportFieldCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ImageWithShimmer extends StatelessWidget {
+  const _ImageWithShimmer({required this.imageUrl, required this.height});
+  final String? imageUrl;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+
+    if (imageUrl == null || imageUrl!.trim().isEmpty) {
+      return SizedBox(
+        height: height,
+        width: double.infinity,
+        child: Container(
+          color: AppColors.superlightgrey,
+          child: const Center(child: Icon(Icons.image_not_supported)),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: height,
+      width: double.infinity,
+      child: CachedNetworkImage(
+        imageUrl: imageUrl!,
+        fit: BoxFit.cover,
+        fadeInDuration: const Duration(milliseconds: 250),
+        placeholder: (context, url) => _shimmerBox(),
+        errorWidget: (context, url, error) => Container(
+          color: AppColors.lightgrey,
+          child: const Center(child: Icon(Icons.broken_image)),
+        ),
+      ),
+    );
+  }
+
+  Widget _shimmerBox() {
+    return Shimmer.fromColors(
+      baseColor: AppColors.lightgrey,
+      highlightColor: AppColors.superlightgrey,
+      child: Container(color: AppColors.lightgrey),
     );
   }
 }

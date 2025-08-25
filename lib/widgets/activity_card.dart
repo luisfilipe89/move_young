@@ -20,6 +20,7 @@ class ActivityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isNetworkImage = imageUrl.startsWith('http');
+    final imgH = AppHeights.cardImage(context);
 
     return Container(
       margin: AppPaddings.topBottom,
@@ -44,14 +45,14 @@ class ActivityCard extends StatelessWidget {
                   child: isNetworkImage
                       ? Image.network(
                           imageUrl,
-                          height: 100,
+                          height: imgH,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           alignment: imageAlignment,
                         )
                       : Image.asset(
                           imageUrl,
-                          height: 100,
+                          height: imgH,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           alignment: imageAlignment,

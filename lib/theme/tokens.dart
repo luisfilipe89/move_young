@@ -34,6 +34,7 @@ class AppSpacing {
 }
 
 class AppHeights {
+  static const superSmall = 2.0;
   static const small = 4.0;
   static const reg = 8.0;
   static const big = 12.0;
@@ -41,6 +42,12 @@ class AppHeights {
   static const huge = 20.0;
   static const superHuge = 24.0;
   static const image = 140.0;
+  static double cardImage(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final target = width * 0.28; // around 28% of screen width
+    return target.clamp(
+        110.0, 170.0); // never smaller than 110, never taller than 170
+  }
 }
 
 class AppWidths {
@@ -61,6 +68,7 @@ class AppPaddings {
   //Symmetric Horizontal
   static const symmHorizontalMedium = EdgeInsets.symmetric(horizontal: 12);
   static const symmHorizontalReg = EdgeInsets.symmetric(horizontal: 16);
+  static const symmHorizontalBig = EdgeInsets.symmetric(horizontal: 24);
   //Symmetrical Vertical
   static const symmVerticalSmall = EdgeInsets.symmetric(vertical: 8);
   //All

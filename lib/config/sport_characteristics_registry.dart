@@ -1,6 +1,5 @@
+//Declares what filters exist and which values they can take
 import 'package:easy_localization/easy_localization.dart';
-
-//Declares which attributes (filters/labels) each sport uses
 
 class SportCharacteristics {
   static const Map<String, List<String>> registry = {

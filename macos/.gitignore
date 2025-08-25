@@ -5,3 +5,8 @@
 # Xcode-related
 **/dgph
 **/xcuserdata/
+
+# IDE specific
+.vscode/
+.cursor/
+

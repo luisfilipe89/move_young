@@ -16,8 +16,8 @@ class SoccerScreen extends StatelessWidget {
 
 class SoccerDisplay {
   static const Map<String, IconData> tagIcons = {
-    'grass': Icons.park,
-    'artificial_turf': Icons.sports_soccer,
-    'lit': Icons.lightbulb,
+    'surface_grass': Icons.grass,
+    'surface_artificial_turf': Icons.texture,
+    'lit': Icons.lightbulb_outline,
   };
 }

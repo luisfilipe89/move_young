@@ -1,3 +1,5 @@
+//Define which icons to show
+
 import 'package:flutter/material.dart';
 import 'package:move_young/screens/activities/sports_screens/soccer.dart';
 import 'package:move_young/screens/activities/sports_screens/basketball.dart';
@@ -29,4 +31,10 @@ class SportDisplayRegistry {
 
   static Map<String, IconData> getIconMap(String sport) =>
       _iconMaps[sport] ?? const {};
+      
+  static IconData? iconFor(String sport, String key, [String? value]) {
+    final composed =
+        value != null ? '${key}_$value' : key; // e.g. surface_grass
+    return _iconMaps[sport]?[composed];
+  }
 }
